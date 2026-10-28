@@ -4,41 +4,54 @@ struct AppRootView: View {
   enum Gate {
     case launching
     case unauthenticated
+    case authenticated
   }
 
-  let gate: Gate = .unauthenticated
+  @State private var auth: AuthStore
+
+  var gate: Gate {
+    switch auth.state {
+    case .authenticated: .authenticated
+    case .signingOut: .launching
+    case .unauthenticated, .signingIn, .failed: .unauthenticated
+    }
+  }
+
+  init(dependencies: AppDependencies = .mock()) {
+    _auth = State(initialValue: AuthStore(client: dependencies.auth))
+  }
 
   var body: some View {
     NavigationStack {
       switch gate {
       case .launching:
-        ProgressView("Starting ChatCall")
+        ProgressView("Signing out…")
       case .unauthenticated:
-        login
+        LoginView(store: auth)
+      case .authenticated:
+        authenticatedPlaceholder
       }
     }
+    .environment(auth)
   }
 
-  private var login: some View {
+  private var authenticatedPlaceholder: some View {
     VStack(spacing: AppTheme.contentSpacing) {
-      Image(systemName: "bubble.left.and.bubble.right.fill")
-        .font(.largeTitle)
-        .foregroundStyle(.tint)
-        .accessibilityHidden(true)
-
-      Text("ChatCall")
-        .font(.largeTitle.bold())
-
-      Text("Sign in to start a conversation.")
-        .font(.body)
-        .foregroundStyle(.secondary)
-        .multilineTextAlignment(.center)
+      if case .authenticated(let session) = auth.state {
+        Text("Welcome, \(session.user.displayName)")
+          .font(.title2.bold())
+          .multilineTextAlignment(.center)
+      }
+      Text("You’re signed in.").foregroundStyle(.secondary)
+      Button("Sign out") { Task { await auth.signOut() } }
+        .buttonStyle(.bordered)
+        .controlSize(.large)
+        .accessibilityIdentifier("auth.signOut")
     }
     .padding(AppTheme.contentSpacing)
     .frame(maxWidth: .infinity, maxHeight: .infinity)
     .background(AppTheme.screenBackground)
-    .navigationTitle("Login")
-    .accessibilityIdentifier("auth.login")
+    .navigationTitle("Chats")
   }
 }
 

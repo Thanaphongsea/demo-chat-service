@@ -6,7 +6,7 @@ struct ChatCallApp: App {
 
   var body: some Scene {
     WindowGroup {
-      AppRootView()
+      AppRootView(dependencies: dependencies)
         .environment(\.appDependencies, dependencies)
     }
   }
