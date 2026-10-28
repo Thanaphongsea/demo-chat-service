@@ -15,6 +15,8 @@ nonisolated struct AppDependencies: Sendable {
       chat = ConversationFixtureClient(fixture: .empty)
     } else if arguments.contains("-demo-failConversationLoadOnce") {
       chat = ConversationFixtureClient(fixture: .failOnce)
+    } else if arguments.contains("-demo-failMessageSendOnce") {
+      chat = ChatRoomFixtureClient(fixture: .failSendOnce, scheduler: scheduler)
     } else {
       chat = MockChatClient(scheduler: scheduler)
     }

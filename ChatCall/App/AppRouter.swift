@@ -26,6 +26,7 @@ final class AppRouter {
   let conversations: ConversationListStore
   var presentedSheet: ComposeSheet?
   private let chatClient: any ChatClient
+  @ObservationIgnored private var rooms: [ConversationID: ChatRoomStore] = [:]
 
   init(chatClient: any ChatClient) {
     self.chatClient = chatClient
@@ -38,6 +39,15 @@ final class AppRouter {
       NewConversationStore(client: chatClient, currentUserID: currentUserID))
   }
 
+  func room(for id: ConversationID, currentUserID: UserID) -> ChatRoomStore {
+    if let store = rooms[id] { return store }
+    let store = ChatRoomStore(conversationID: id, currentUserID: currentUserID, client: chatClient)
+    rooms[id] = store
+    return store
+  }
+
+  func requestVideo(in id: ConversationID) { chats.routes.append(.startCall(id)) }
+
   func finishCompose(_ conversation: Conversation, from store: NewConversationStore) {
     guard case .newConversation(let activeStore) = presentedSheet, activeStore === store,
       store.createdConversation == conversation
@@ -49,6 +59,8 @@ final class AppRouter {
   }
 
   func reset() {
+    for room in rooms.values { room.cancel() }
+    rooms = [:]
     if case .newConversation(let store) = presentedSheet { store.cancel() }
     presentedSheet = nil
     conversations.reset()

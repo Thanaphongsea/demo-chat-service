@@ -22,12 +22,12 @@ nonisolated final class ConversationListTests: XCTestCase {
     XCTAssertTrue(app.buttons["conversations.room.conversation-team"].exists)
     XCTAssertFalse(app.buttons["conversations.room.conversation-ava"].exists)
     app.buttons["conversations.room.conversation-team"].tap()
-    XCTAssertTrue(app.staticTexts["room.placeholder"].waitForExistence(timeout: 5))
+    XCTAssertTrue(app.textFields["room.composer"].waitForExistence(timeout: 5))
     XCTAssertTrue(app.navigationBars["Design Team"].exists)
     app.tabBars.buttons["Calls"].tap()
     XCTAssertTrue(app.staticTexts["calls.placeholder"].exists)
     app.tabBars.buttons["Chats"].tap()
-    XCTAssertTrue(app.staticTexts["room.placeholder"].exists)
+    XCTAssertTrue(app.textFields["room.composer"].exists)
     app.tabBars.buttons["Profile"].tap()
     XCTAssertTrue(app.buttons["auth.signOut"].exists)
   }
@@ -57,12 +57,12 @@ nonisolated final class ConversationListTests: XCTestCase {
   func testLogoutFromRoomResetsTabNavigationAndSearch() {
     let app = signedIn()
     app.buttons["conversations.room.conversation-ava"].tap()
-    XCTAssertTrue(app.staticTexts["room.placeholder"].waitForExistence(timeout: 5))
+    XCTAssertTrue(app.textFields["room.composer"].waitForExistence(timeout: 5))
     app.tabBars.buttons["Profile"].tap()
     app.buttons["auth.signOut"].tap()
     signIn(app)
     XCTAssertTrue(app.buttons["conversations.room.conversation-ava"].waitForExistence(timeout: 5))
-    XCTAssertFalse(app.staticTexts["room.placeholder"].exists)
+    XCTAssertFalse(app.textFields["room.composer"].exists)
     XCTAssertTrue(app.tabBars.buttons["Chats"].isSelected)
   }
 

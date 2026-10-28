@@ -77,16 +77,24 @@ private struct TabNavigationView<Content: View>: View {
 private struct AppDestinationView: View {
   let route: AppRoute
   let router: AppRouter
+  @Environment(AuthStore.self) private var auth
 
   var body: some View {
     switch route {
     case .room(let id):
+      if case .authenticated(let session) = auth.state {
+        let conversation = router.conversations.conversations.first { $0.id == id }
+        ChatRoomView(
+          store: router.room(for: id, currentUserID: session.user.id),
+          title: conversation?.name ?? "Chat", kind: conversation?.kind ?? .direct,
+          video: { router.requestVideo(in: id) })
+      }
+    case .startCall:
       ContentUnavailableView(
-        "Conversation", systemImage: "bubble.left.and.bubble.right",
-        description: Text("Messages will appear here.")
+        "Video call", systemImage: "video",
+        description: Text("Call setup will be available in the next demo.")
       )
-      .accessibilityIdentifier("room.placeholder")
-      .navigationTitle(router.conversations.conversations.first { $0.id == id }?.name ?? "Chat")
+      .accessibilityIdentifier("call.startRequest")
     case .call:
       ContentUnavailableView("Call", systemImage: "phone")
     case .compose:
