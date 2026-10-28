@@ -1,0 +1,538 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		37C63CC0797B41C29A2513E7 /* ChatCallApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 752695A44AB5CF906A3CD088 /* ChatCallApp.swift */; };
+		7AD4D9112F3BEDEB0C8A59E7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 867FD7E19940CA34327FF333 /* Assets.xcassets */; };
+		7B1FECC737A38EA2D17712CC /* ProjectSmokeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1525548CF01E7F8121DAD102 /* ProjectSmokeTests.swift */; };
+		7B51EB4B0B6F424296963019 /* LaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B12B204AEC18981234362273 /* LaunchTests.swift */; };
+		B08194FDBEE39575DCAB1078 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = C80A3A6C9ECB564D4C00FE1A /* AppTheme.swift */; };
+		FAAF60A1747F5598BE7ED4C9 /* AppRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96E6F2926C0EEA61115CAC77 /* AppRootView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		13D42A56B16C440D40B83EF1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8531F114F432F0E2893969C7 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7CFA3EDFCBAB73F5E6378056;
+			remoteInfo = ChatCall;
+		};
+		6A3716020779374D2CE3C14D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8531F114F432F0E2893969C7 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7CFA3EDFCBAB73F5E6378056;
+			remoteInfo = ChatCall;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		1525548CF01E7F8121DAD102 /* ProjectSmokeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectSmokeTests.swift; sourceTree = "<group>"; };
+		20FC7F434BA48B80FA042BD3 /* ChatCallTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = ChatCallTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		5C167F6965D067730C45E197 /* ChatCallUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = ChatCallUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		752695A44AB5CF906A3CD088 /* ChatCallApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatCallApp.swift; sourceTree = "<group>"; };
+		867FD7E19940CA34327FF333 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		96E6F2926C0EEA61115CAC77 /* AppRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRootView.swift; sourceTree = "<group>"; };
+		B12B204AEC18981234362273 /* LaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchTests.swift; sourceTree = "<group>"; };
+		B7CDCD907BD3B2CF7310421D /* ChatCall.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = ChatCall.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C80A3A6C9ECB564D4C00FE1A /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		0788AA7F6EB59AF280ED20A7 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				867FD7E19940CA34327FF333 /* Assets.xcassets */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		165BC7C277C70529756E67FE /* App */ = {
+			isa = PBXGroup;
+			children = (
+				96E6F2926C0EEA61115CAC77 /* AppRootView.swift */,
+				752695A44AB5CF906A3CD088 /* ChatCallApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		22DB38B2C06B7AAB1B2108DF = {
+			isa = PBXGroup;
+			children = (
+				77716F4AFD22F7C6FBA1BB07 /* ChatCall */,
+				7B35255815EEE4D244BE69C2 /* ChatCallTests */,
+				E1F06A66050F402C528F0555 /* ChatCallUITests */,
+				829D33ECC3AA7E60BB8BAB2E /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		77716F4AFD22F7C6FBA1BB07 /* ChatCall */ = {
+			isa = PBXGroup;
+			children = (
+				165BC7C277C70529756E67FE /* App */,
+				F97F541BAD9908CB4E8418CA /* DesignSystem */,
+				0788AA7F6EB59AF280ED20A7 /* Resources */,
+			);
+			path = ChatCall;
+			sourceTree = "<group>";
+		};
+		7B35255815EEE4D244BE69C2 /* ChatCallTests */ = {
+			isa = PBXGroup;
+			children = (
+				1525548CF01E7F8121DAD102 /* ProjectSmokeTests.swift */,
+			);
+			path = ChatCallTests;
+			sourceTree = "<group>";
+		};
+		829D33ECC3AA7E60BB8BAB2E /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B7CDCD907BD3B2CF7310421D /* ChatCall.app */,
+				20FC7F434BA48B80FA042BD3 /* ChatCallTests.xctest */,
+				5C167F6965D067730C45E197 /* ChatCallUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		E1F06A66050F402C528F0555 /* ChatCallUITests */ = {
+			isa = PBXGroup;
+			children = (
+				B12B204AEC18981234362273 /* LaunchTests.swift */,
+			);
+			path = ChatCallUITests;
+			sourceTree = "<group>";
+		};
+		F97F541BAD9908CB4E8418CA /* DesignSystem */ = {
+			isa = PBXGroup;
+			children = (
+				C80A3A6C9ECB564D4C00FE1A /* AppTheme.swift */,
+			);
+			path = DesignSystem;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		338F365E558A46FD330D4342 /* ChatCallUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BA397B7F731572E1FD1B5503 /* Build configuration list for PBXNativeTarget "ChatCallUITests" */;
+			buildPhases = (
+				3CB48A3DC5814E1827D7131A /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B549A26D9B019D1FAFCEA683 /* PBXTargetDependency */,
+			);
+			name = ChatCallUITests;
+			packageProductDependencies = (
+			);
+			productName = ChatCallUITests;
+			productReference = 5C167F6965D067730C45E197 /* ChatCallUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		5F07EC93E1F69DAA4A410069 /* ChatCallTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0609CCA404149B0E67D3BF9C /* Build configuration list for PBXNativeTarget "ChatCallTests" */;
+			buildPhases = (
+				788CF05E7DED2219DABCAAF6 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				6680E33A3A533986764B7A19 /* PBXTargetDependency */,
+			);
+			name = ChatCallTests;
+			packageProductDependencies = (
+			);
+			productName = ChatCallTests;
+			productReference = 20FC7F434BA48B80FA042BD3 /* ChatCallTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		7CFA3EDFCBAB73F5E6378056 /* ChatCall */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A5308144C1FC72EB94C3F486 /* Build configuration list for PBXNativeTarget "ChatCall" */;
+			buildPhases = (
+				9AAE506D1183D930C776C9E1 /* Sources */,
+				FA520AA0C20140E24A65783B /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ChatCall;
+			packageProductDependencies = (
+			);
+			productName = ChatCall;
+			productReference = B7CDCD907BD3B2CF7310421D /* ChatCall.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		8531F114F432F0E2893969C7 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					338F365E558A46FD330D4342 = {
+						TestTargetID = 7CFA3EDFCBAB73F5E6378056;
+					};
+				};
+			};
+			buildConfigurationList = A29BC7B57122918F16CD9323 /* Build configuration list for PBXProject "ChatCall" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 22DB38B2C06B7AAB1B2108DF;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 829D33ECC3AA7E60BB8BAB2E /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				7CFA3EDFCBAB73F5E6378056 /* ChatCall */,
+				5F07EC93E1F69DAA4A410069 /* ChatCallTests */,
+				338F365E558A46FD330D4342 /* ChatCallUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		FA520AA0C20140E24A65783B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7AD4D9112F3BEDEB0C8A59E7 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		3CB48A3DC5814E1827D7131A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7B51EB4B0B6F424296963019 /* LaunchTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		788CF05E7DED2219DABCAAF6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7B1FECC737A38EA2D17712CC /* ProjectSmokeTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9AAE506D1183D930C776C9E1 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FAAF60A1747F5598BE7ED4C9 /* AppRootView.swift in Sources */,
+				B08194FDBEE39575DCAB1078 /* AppTheme.swift in Sources */,
+				37C63CC0797B41C29A2513E7 /* ChatCallApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		6680E33A3A533986764B7A19 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7CFA3EDFCBAB73F5E6378056 /* ChatCall */;
+			targetProxy = 13D42A56B16C440D40B83EF1 /* PBXContainerItemProxy */;
+		};
+		B549A26D9B019D1FAFCEA683 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7CFA3EDFCBAB73F5E6378056 /* ChatCall */;
+			targetProxy = 6A3716020779374D2CE3C14D /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		30241CA2AB0B1F9BC2A4EFB8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.ChatCallUITests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = ChatCall;
+			};
+			name = Debug;
+		};
+		5F9A21EC349D6EE3447D0636 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		60109C3F24AD365DCB3C1E6D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.ChatCallTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ChatCall.app/ChatCall";
+			};
+			name = Debug;
+		};
+		723A2A857CCB3BC678B40F30 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = "";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_KEY_CFBundleDisplayName = ChatCall;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.ChatCall;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		B2FB4DD4A0CEAF94EEDAB9E0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.ChatCallUITests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = ChatCall;
+			};
+			name = Release;
+		};
+		DFD1934398C7CCF98025590D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.ChatCallTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ChatCall.app/ChatCall";
+			};
+			name = Release;
+		};
+		E450E1B31AF44457FA43CFC6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		E9B63CB2FE10236C526C944D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = "";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_KEY_CFBundleDisplayName = ChatCall;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.ChatCall;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		0609CCA404149B0E67D3BF9C /* Build configuration list for PBXNativeTarget "ChatCallTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				60109C3F24AD365DCB3C1E6D /* Debug */,
+				DFD1934398C7CCF98025590D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		A29BC7B57122918F16CD9323 /* Build configuration list for PBXProject "ChatCall" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E450E1B31AF44457FA43CFC6 /* Debug */,
+				5F9A21EC349D6EE3447D0636 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		A5308144C1FC72EB94C3F486 /* Build configuration list for PBXNativeTarget "ChatCall" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				723A2A857CCB3BC678B40F30 /* Debug */,
+				E9B63CB2FE10236C526C944D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		BA397B7F731572E1FD1B5503 /* Build configuration list for PBXNativeTarget "ChatCallUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				30241CA2AB0B1F9BC2A4EFB8 /* Debug */,
+				B2FB4DD4A0CEAF94EEDAB9E0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 8531F114F432F0E2893969C7 /* Project object */;
+}
