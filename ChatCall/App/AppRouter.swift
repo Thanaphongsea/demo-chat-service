@@ -24,13 +24,15 @@ final class AppRouter {
   var calls = RouterPath()
   var profile = RouterPath()
   let conversations: ConversationListStore
+  let callStore: CallStore
   var presentedSheet: ComposeSheet?
   private let chatClient: any ChatClient
   @ObservationIgnored private var rooms: [ConversationID: ChatRoomStore] = [:]
 
-  init(chatClient: any ChatClient) {
+  init(chatClient: any ChatClient, callClient: any CallClient = MockCallClient()) {
     self.chatClient = chatClient
     conversations = ConversationListStore(client: chatClient)
+    callStore = CallStore(client: callClient, chatClient: chatClient)
   }
 
   func presentComposer(currentUserID: UserID) {
@@ -59,6 +61,7 @@ final class AppRouter {
   }
 
   func reset() {
+    callStore.reset()
     for room in rooms.values { room.cancel() }
     rooms = [:]
     if case .newConversation(let store) = presentedSheet { store.cancel() }

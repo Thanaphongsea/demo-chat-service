@@ -23,7 +23,9 @@ nonisolated struct AppDependencies: Sendable {
     return AppDependencies(
       auth: MockAuthClient(scheduler: scheduler),
       chat: chat,
-      calls: MockCallClient(scheduler: scheduler))
+      calls: MockCallClient(
+        scheduler: arguments.contains("-demo-immediateEvents")
+          ? scheduler : RuntimeDemoScheduler(minimumDelay: .seconds(3))))
   }
 }
 

@@ -5,8 +5,9 @@ nonisolated protocol DemoScheduler: Sendable {
 }
 
 nonisolated struct RuntimeDemoScheduler: DemoScheduler {
+  var minimumDelay: Duration = .zero
   nonisolated func sleep(for duration: Duration) async throws {
-    try await Task.sleep(for: duration)
+    try await Task.sleep(for: max(duration, minimumDelay))
   }
 }
 

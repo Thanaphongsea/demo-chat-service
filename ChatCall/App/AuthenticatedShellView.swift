@@ -5,6 +5,7 @@ struct AuthenticatedShellView: View {
   @Environment(AuthStore.self) private var auth
 
   var body: some View {
+    @Bindable var callStore = router.callStore
     TabView(selection: $router.selectedTab) {
       Tab("Chats", systemImage: "bubble.left.and.bubble.right", value: .chats) {
         TabNavigationView(path: router.chats, router: router) {
@@ -19,12 +20,7 @@ struct AuthenticatedShellView: View {
       .badge(router.conversations.totalUnreadCount)
       Tab("Calls", systemImage: "phone", value: .calls) {
         TabNavigationView(path: router.calls, router: router) {
-          ContentUnavailableView(
-            "No calls yet", systemImage: "phone",
-            description: Text("Your recent calls will appear here.")
-          )
-          .accessibilityIdentifier("calls.placeholder")
-          .navigationTitle("Calls")
+          CallsListView(store: router.callStore)
         }
       }
       Tab("Profile", systemImage: "person.crop.circle", value: .profile) {
@@ -48,6 +44,10 @@ struct AuthenticatedShellView: View {
       case .newConversation(let store): NewConversationView(store: store, router: router)
       }
     }
+    .fullScreenCover(isPresented: $callStore.isPresented) {
+      CallPresentationView(store: router.callStore)
+    }
+    .task { await callStore.start() }
   }
 
   private var signOutButton: some View {
@@ -89,12 +89,21 @@ private struct AppDestinationView: View {
           title: conversation?.name ?? "Chat", kind: conversation?.kind ?? .direct,
           video: { router.requestVideo(in: id) })
       }
-    case .startCall:
-      ContentUnavailableView(
-        "Video call", systemImage: "video",
-        description: Text("Call setup will be available in the next demo.")
-      )
-      .accessibilityIdentifier("call.startRequest")
+    case .startCall(let id):
+      VStack(spacing: 20) {
+        if let error = router.callStore.errorMessage {
+          Text(error).accessibilityIdentifier("call.error")
+        } else {
+          ProgressView("Starting call…")
+        }
+      }
+      .padding()
+      .task {
+        await router.callStore.startVideo(in: id)
+        if router.callStore.isPresented, router.chats.routes.last == .startCall(id) {
+          router.chats.routes.removeLast()
+        }
+      }
     case .call:
       ContentUnavailableView("Call", systemImage: "phone")
     case .compose:

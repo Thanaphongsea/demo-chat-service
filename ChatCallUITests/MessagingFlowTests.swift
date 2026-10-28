@@ -61,7 +61,7 @@ nonisolated final class MessagingFlowTests: XCTestCase {
     app.buttons["room.send"].tap()
     XCTAssertTrue(app.staticTexts["Delivered"].waitForExistence(timeout: 5))
     app.buttons["room.video"].tap()
-    XCTAssertTrue(app.staticTexts["call.startRequest"].waitForExistence(timeout: 5))
+    XCTAssertTrue(app.buttons["call.end"].waitForExistence(timeout: 5))
   }
 
   @MainActor

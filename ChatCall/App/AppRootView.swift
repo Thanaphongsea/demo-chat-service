@@ -20,7 +20,7 @@ struct AppRootView: View {
 
   init(dependencies: AppDependencies = .mock()) {
     let auth = AuthStore(client: dependencies.auth)
-    let router = AppRouter(chatClient: dependencies.chat)
+    let router = AppRouter(chatClient: dependencies.chat, callClient: dependencies.calls)
     auth.resetAuthenticatedState = { [weak router] in router?.reset() }
     _auth = State(initialValue: auth)
     _router = State(initialValue: router)
