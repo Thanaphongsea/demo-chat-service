@@ -8,8 +8,12 @@ struct AuthenticatedShellView: View {
     TabView(selection: $router.selectedTab) {
       Tab("Chats", systemImage: "bubble.left.and.bubble.right", value: .chats) {
         TabNavigationView(path: router.chats, router: router) {
-          ConversationListView(store: router.conversations)
-            .toolbar { ToolbarItem(placement: .topBarTrailing) { signOutButton } }
+          ConversationListView(store: router.conversations) {
+            if case .authenticated(let session) = auth.state {
+              router.presentComposer(currentUserID: session.user.id)
+            }
+          }
+          .toolbar { ToolbarItem(placement: .topBarTrailing) { signOutButton } }
         }
       }
       .badge(router.conversations.totalUnreadCount)
@@ -37,6 +41,11 @@ struct AuthenticatedShellView: View {
           .background(AppTheme.screenBackground)
           .navigationTitle("Profile")
         }
+      }
+    }
+    .sheet(item: $router.presentedSheet) { sheet in
+      switch sheet {
+      case .newConversation(let store): NewConversationView(store: store, router: router)
       }
     }
   }

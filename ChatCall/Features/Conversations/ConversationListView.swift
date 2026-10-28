@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ConversationListView: View {
   @Bindable var store: ConversationListStore
+  var compose: (() -> Void)?
 
   var body: some View {
     Group {
@@ -38,6 +39,14 @@ struct ConversationListView: View {
     .frame(maxWidth: .infinity, maxHeight: .infinity)
     .background(AppTheme.screenBackground)
     .navigationTitle("Chats")
+    .toolbar {
+      if let compose {
+        ToolbarItem(placement: .topBarTrailing) {
+          Button("New chat", systemImage: "square.and.pencil", action: compose)
+            .accessibilityIdentifier("conversations.compose")
+        }
+      }
+    }
     .searchable(
       text: $store.searchText, placement: .navigationBarDrawer(displayMode: .always),
       prompt: "Search chats"

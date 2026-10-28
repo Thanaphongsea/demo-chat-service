@@ -88,6 +88,10 @@ final class ConversationListStore {
     state = .loading
   }
 
+  func includeCreated(_ conversation: Conversation) {
+    reduce(.conversationUpdated(conversation), revision: revision)
+  }
+
   private func reduce(_ event: ChatEvent, revision attempt: Int) {
     guard attempt == revision else { return }
     // The repository publishes authoritative previews and unread counts as conversation updates.
