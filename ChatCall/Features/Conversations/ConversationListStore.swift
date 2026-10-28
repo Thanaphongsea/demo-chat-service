@@ -15,6 +15,7 @@ final class ConversationListStore {
   @ObservationIgnored private let client: any ChatClient
   @ObservationIgnored private var eventsTask: Task<Void, Never>?
   @ObservationIgnored private var loadTask: Task<[Conversation], any Error>?
+  @ObservationIgnored private var updatesDuringLoad: [ConversationID: Conversation] = [:]
   @ObservationIgnored private var revision = 0
 
   var visibleConversations: [Conversation] {
@@ -34,6 +35,7 @@ final class ConversationListStore {
   func load() async {
     guard loadTask == nil, !Task.isCancelled else { return }
     let attempt = revision
+    updatesDuringLoad = [:]
     state = .loading
     let operation = Task { try await client.listConversations() }
     loadTask = operation
@@ -42,8 +44,11 @@ final class ConversationListStore {
         let rooms = try await operation.value
         try Task.checkCancellation()
         guard attempt == revision else { return }
-        conversations = rooms
-        state = rooms.isEmpty ? .empty : .loaded
+        // Events received after this snapshot began take precedence over its older values.
+        conversations =
+          rooms.filter { updatesDuringLoad[$0.id] == nil }
+          + Array(updatesDuringLoad.values)
+        state = conversations.isEmpty ? .empty : .loaded
       } catch {
         guard attempt == revision, !Task.isCancelled, !(error is CancellationError) else { return }
         state = .failed("Unable to load chats. Please try again.")
@@ -51,7 +56,10 @@ final class ConversationListStore {
     } onCancel: {
       operation.cancel()
     }
-    if attempt == revision { loadTask = nil }
+    if attempt == revision {
+      loadTask = nil
+      updatesDuringLoad = [:]
+    }
   }
 
   func start() {
@@ -74,6 +82,7 @@ final class ConversationListStore {
     eventsTask = nil
     loadTask?.cancel()
     loadTask = nil
+    updatesDuringLoad = [:]
     conversations = []
     searchText = ""
     state = .loading
@@ -83,6 +92,7 @@ final class ConversationListStore {
     guard attempt == revision else { return }
     // The repository publishes authoritative previews and unread counts as conversation updates.
     guard case .conversationUpdated(let conversation) = event else { return }
+    if loadTask != nil { updatesDuringLoad[conversation.id] = conversation }
     if let index = conversations.firstIndex(where: { $0.id == conversation.id }) {
       conversations[index] = conversation
     } else {

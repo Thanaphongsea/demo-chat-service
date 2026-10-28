@@ -84,6 +84,43 @@ struct ConversationListStoreTests {
     #expect(store.visibleConversations.map(\.id.rawValue) == ["conversation-ava"])
   }
 
+  @Test("A retry snapshot cannot overwrite a newer conversation event received while it loads")
+  func eventDuringRetrySurvivesSnapshot() async throws {
+    let client = ControlledListClient(
+      rooms: MockSeed.standard.conversations, deferred: true, failOnce: true)
+    let store = ConversationListStore(client: client)
+    store.start()
+    defer { store.reset() }
+    try #require(
+      await waitUntil { store.state == .failed("Unable to load chats. Please try again.") })
+    var retryFinished = false
+    let retry = Task {
+      await store.load()
+      retryFinished = true
+    }
+    defer { retry.cancel() }
+    try #require(await waitUntil { await client.pendingLoads == 1 })
+    let message = Message(
+      id: MessageID("message-retry-update"), conversationID: ConversationID("conversation-team"),
+      senderID: UserID("user-noah"), text: "Updated while retrying",
+      sentAt: MockSeed.date.addingTimeInterval(10), deliveryState: .delivered)
+    let update = try Conversation(
+      id: message.conversationID, kind: .group, name: "Updated Team",
+      memberIDs: [UserID("user-me"), UserID("user-ava"), UserID("user-noah")],
+      unreadCount: 7, lastMessage: message, updatedAt: message.sentAt)
+    await client.emit(.conversationUpdated(update))
+    try #require(await waitUntil { store.totalUnreadCount == 7 })
+    await client.completeLoad()
+    try #require(await waitUntil { retryFinished })
+    #expect(store.totalUnreadCount == 8)
+    #expect(
+      store.visibleConversations.map(\.id.rawValue) == [
+        "conversation-team", "conversation-ava"
+      ])
+    #expect(store.visibleConversations.first?.name == "Updated Team")
+    #expect(store.visibleConversations.first?.lastMessage?.text == "Updated while retrying")
+  }
+
   @Test("Reset cancels the event stream and rejects buffered events and a late snapshot")
   func resetRejectsStaleWork() async throws {
     let client = ControlledListClient(rooms: MockSeed.standard.conversations, deferred: true)
