@@ -8,6 +8,7 @@ struct AppRootView: View {
   }
 
   @State private var auth: AuthStore
+  @State private var router: AppRouter
 
   var gate: Gate {
     switch auth.state {
@@ -18,41 +19,27 @@ struct AppRootView: View {
   }
 
   init(dependencies: AppDependencies = .mock()) {
-    _auth = State(initialValue: AuthStore(client: dependencies.auth))
+    let auth = AuthStore(client: dependencies.auth)
+    let router = AppRouter(chatClient: dependencies.chat)
+    auth.resetAuthenticatedState = { [weak router] in router?.reset() }
+    _auth = State(initialValue: auth)
+    _router = State(initialValue: router)
   }
 
   var body: some View {
-    NavigationStack {
+    Group {
       switch gate {
       case .launching:
         ProgressView("Signing out…")
       case .unauthenticated:
-        LoginView(store: auth)
+        NavigationStack { LoginView(store: auth) }
       case .authenticated:
-        authenticatedPlaceholder
+        AuthenticatedShellView(router: router)
       }
     }
     .environment(auth)
   }
 
-  private var authenticatedPlaceholder: some View {
-    VStack(spacing: AppTheme.contentSpacing) {
-      if case .authenticated(let session) = auth.state {
-        Text("Welcome, \(session.user.displayName)")
-          .font(.title2.bold())
-          .multilineTextAlignment(.center)
-      }
-      Text("You’re signed in.").foregroundStyle(.secondary)
-      Button("Sign out") { Task { await auth.signOut() } }
-        .buttonStyle(.bordered)
-        .controlSize(.large)
-        .accessibilityIdentifier("auth.signOut")
-    }
-    .padding(AppTheme.contentSpacing)
-    .frame(maxWidth: .infinity, maxHeight: .infinity)
-    .background(AppTheme.screenBackground)
-    .navigationTitle("Chats")
-  }
 }
 
 #Preview {

@@ -7,32 +7,45 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0073CA33429060F054698C40 /* AuthenticatedShellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 769AA539D43E42EA80B3BC5A /* AuthenticatedShellView.swift */; };
 		0EE6996647326FED4B27ECD9 /* AppDependencies.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0596FAD598EAC043BDA7DE1A /* AppDependencies.swift */; };
 		1D2D1EC7492FF03707D68D39 /* DemoScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC3C5209370B7E36628DD9E3 /* DemoScheduler.swift */; };
 		28B7C632D4F3DA9487296688 /* MockChatClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = F82BAF42E3AAC12B248ACCD1 /* MockChatClient.swift */; };
+		2BA11C776DB0B4EFB50635F0 /* ConversationListStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEA44074347F79A6A79D0AD9 /* ConversationListStore.swift */; };
 		3053EE9467D86A33106016CB /* AuthModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FABCF766BC4BF9646488ACD /* AuthModels.swift */; };
 		37C63CC0797B41C29A2513E7 /* ChatCallApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 752695A44AB5CF906A3CD088 /* ChatCallApp.swift */; };
+		421C5CF95406C1C9A7CC130F /* ConversationListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F2956074A417F673081718A /* ConversationListView.swift */; };
 		5139BB7851C13DF805CC945F /* LoginForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07710BDCD6E57F47172CEA2A /* LoginForm.swift */; };
 		51F8C1428C21C4CD41F8551A /* ChatModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E00BA2E6DE0B51EBE0444AC /* ChatModels.swift */; };
+		584B3C458212F52ECC2400FC /* AsyncTestSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 206B63EA4A97BEFE041FAD1B /* AsyncTestSupport.swift */; };
 		647CC7A6042EFE9F133AFEA4 /* MockCallClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5D4A2681AF39AD83385F49E /* MockCallClient.swift */; };
 		651BDFDD4B6BE78FF5F58F07 /* MockCallClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 932BC14055B87579E927E7C3 /* MockCallClientTests.swift */; };
+		6A083770BA158A0406BAE4C6 /* ConversationRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CAF3092825321F5E2001D30 /* ConversationRow.swift */; };
 		6A42BFBC4F0AD899D029E9A3 /* AuthClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97B9704568A4FD06C6B00B04 /* AuthClient.swift */; };
 		6BA8038618DEE35E0145C7AD /* LoginFlowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30A6D340F34D68EC3BE67E05 /* LoginFlowTests.swift */; };
+		740F0CEDB0681F5BEE9FA5D5 /* AvatarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7022D5CD77A27EA929746D9 /* AvatarView.swift */; };
 		7AD4D9112F3BEDEB0C8A59E7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 867FD7E19940CA34327FF333 /* Assets.xcassets */; };
 		7B1FECC737A38EA2D17712CC /* ProjectSmokeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1525548CF01E7F8121DAD102 /* ProjectSmokeTests.swift */; };
 		7B51EB4B0B6F424296963019 /* LaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B12B204AEC18981234362273 /* LaunchTests.swift */; };
 		7BF2B4B8301EFC8B0F4AB27A /* ChatClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD785C48F9062BD80D95C4A3 /* ChatClient.swift */; };
 		8E59B3E70DC5D4EF27A08D52 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEE2E271EB63263C19549235 /* LoginView.swift */; };
 		9BF63487E4D59FAA1EB33539 /* MockChatClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7F6796365D877007A660240 /* MockChatClientTests.swift */; };
+		AD64D2627DFF12D819D02F74 /* AppRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FBF1019B419DD1D616755B3 /* AppRouter.swift */; };
 		B08194FDBEE39575DCAB1078 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = C80A3A6C9ECB564D4C00FE1A /* AppTheme.swift */; };
+		B3D2AE517D8982AE87B8D115 /* ConversationListStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14406D254BC5C6FE18450FF4 /* ConversationListStoreTests.swift */; };
 		C82139C7D2A9D2191E44A66A /* AuthStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26343FCE1C253FBE88908A07 /* AuthStoreTests.swift */; };
 		CDC978A08B31EAB4C7665871 /* AuthStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D29F1CBD393CFAD41013BF79 /* AuthStore.swift */; };
 		D336A5007EDCB259B10C3E93 /* CallModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47C63BCE5FCE4B5F61F85585 /* CallModels.swift */; };
+		D67C249BF8BB960B0BC34246 /* ConversationListFixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE73371421C67CABBD090007 /* ConversationListFixtures.swift */; };
+		DAD1A5D0708ED65D197BD1AF /* UnreadBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD3B528F3FD122A5B355532B /* UnreadBadge.swift */; };
 		E09BB426378B36F87B0FE64A /* MockAuthClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C88325AD374FFBE79EC9E3C /* MockAuthClientTests.swift */; };
 		E5D992E107863B3409BADFF1 /* CallClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = D71E3DC1B7C005595059D80E /* CallClient.swift */; };
 		E7B509EF94A72DA7C623705A /* MockSeed.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F105320EAB6BE60F1D59980 /* MockSeed.swift */; };
+		F77F457273CF5475C70E08BB /* ConversationListTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19CF33AF6626CA54D59DA730 /* ConversationListTests.swift */; };
 		FAAF60A1747F5598BE7ED4C9 /* AppRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96E6F2926C0EEA61115CAC77 /* AppRootView.swift */; };
+		FE1860837DD399EB974A2042 /* AsyncStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6338228A45EFAC4609CBE97 /* AsyncStateView.swift */; };
 		FED8E4C02B563AE68F786A24 /* MockAuthClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1343BC7376B39C3EFC04EF2C /* MockAuthClient.swift */; };
+		FFA3A1CE87A8FFF11CF7BEFE /* AppTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7723A2A2F514FFA1648D9A37 /* AppTab.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -55,31 +68,44 @@
 /* Begin PBXFileReference section */
 		0596FAD598EAC043BDA7DE1A /* AppDependencies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDependencies.swift; sourceTree = "<group>"; };
 		07710BDCD6E57F47172CEA2A /* LoginForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginForm.swift; sourceTree = "<group>"; };
+		0F2956074A417F673081718A /* ConversationListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationListView.swift; sourceTree = "<group>"; };
 		1343BC7376B39C3EFC04EF2C /* MockAuthClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAuthClient.swift; sourceTree = "<group>"; };
+		14406D254BC5C6FE18450FF4 /* ConversationListStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationListStoreTests.swift; sourceTree = "<group>"; };
 		1525548CF01E7F8121DAD102 /* ProjectSmokeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectSmokeTests.swift; sourceTree = "<group>"; };
+		19CF33AF6626CA54D59DA730 /* ConversationListTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationListTests.swift; sourceTree = "<group>"; };
+		206B63EA4A97BEFE041FAD1B /* AsyncTestSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncTestSupport.swift; sourceTree = "<group>"; };
 		20FC7F434BA48B80FA042BD3 /* ChatCallTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = ChatCallTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		26343FCE1C253FBE88908A07 /* AuthStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthStoreTests.swift; sourceTree = "<group>"; };
 		30A6D340F34D68EC3BE67E05 /* LoginFlowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginFlowTests.swift; sourceTree = "<group>"; };
 		47C63BCE5FCE4B5F61F85585 /* CallModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallModels.swift; sourceTree = "<group>"; };
+		4CAF3092825321F5E2001D30 /* ConversationRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationRow.swift; sourceTree = "<group>"; };
 		4E00BA2E6DE0B51EBE0444AC /* ChatModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatModels.swift; sourceTree = "<group>"; };
 		4FABCF766BC4BF9646488ACD /* AuthModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthModels.swift; sourceTree = "<group>"; };
 		5C167F6965D067730C45E197 /* ChatCallUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = ChatCallUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		752695A44AB5CF906A3CD088 /* ChatCallApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatCallApp.swift; sourceTree = "<group>"; };
+		769AA539D43E42EA80B3BC5A /* AuthenticatedShellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticatedShellView.swift; sourceTree = "<group>"; };
+		7723A2A2F514FFA1648D9A37 /* AppTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTab.swift; sourceTree = "<group>"; };
 		867FD7E19940CA34327FF333 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		8C88325AD374FFBE79EC9E3C /* MockAuthClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAuthClientTests.swift; sourceTree = "<group>"; };
 		932BC14055B87579E927E7C3 /* MockCallClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockCallClientTests.swift; sourceTree = "<group>"; };
 		96E6F2926C0EEA61115CAC77 /* AppRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRootView.swift; sourceTree = "<group>"; };
 		97B9704568A4FD06C6B00B04 /* AuthClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthClient.swift; sourceTree = "<group>"; };
 		9F105320EAB6BE60F1D59980 /* MockSeed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockSeed.swift; sourceTree = "<group>"; };
+		9FBF1019B419DD1D616755B3 /* AppRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRouter.swift; sourceTree = "<group>"; };
 		B12B204AEC18981234362273 /* LaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchTests.swift; sourceTree = "<group>"; };
 		B7CDCD907BD3B2CF7310421D /* ChatCall.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = ChatCall.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BEE2E271EB63263C19549235 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		C80A3A6C9ECB564D4C00FE1A /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
+		CD3B528F3FD122A5B355532B /* UnreadBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnreadBadge.swift; sourceTree = "<group>"; };
 		CD785C48F9062BD80D95C4A3 /* ChatClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatClient.swift; sourceTree = "<group>"; };
 		D29F1CBD393CFAD41013BF79 /* AuthStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthStore.swift; sourceTree = "<group>"; };
+		D6338228A45EFAC4609CBE97 /* AsyncStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncStateView.swift; sourceTree = "<group>"; };
 		D71E3DC1B7C005595059D80E /* CallClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallClient.swift; sourceTree = "<group>"; };
+		DEA44074347F79A6A79D0AD9 /* ConversationListStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationListStore.swift; sourceTree = "<group>"; };
 		EC3C5209370B7E36628DD9E3 /* DemoScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoScheduler.swift; sourceTree = "<group>"; };
+		EE73371421C67CABBD090007 /* ConversationListFixtures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationListFixtures.swift; sourceTree = "<group>"; };
 		F5D4A2681AF39AD83385F49E /* MockCallClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockCallClient.swift; sourceTree = "<group>"; };
+		F7022D5CD77A27EA929746D9 /* AvatarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvatarView.swift; sourceTree = "<group>"; };
 		F7F6796365D877007A660240 /* MockChatClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockChatClientTests.swift; sourceTree = "<group>"; };
 		F82BAF42E3AAC12B248ACCD1 /* MockChatClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockChatClient.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -98,6 +124,9 @@
 			children = (
 				0596FAD598EAC043BDA7DE1A /* AppDependencies.swift */,
 				96E6F2926C0EEA61115CAC77 /* AppRootView.swift */,
+				9FBF1019B419DD1D616755B3 /* AppRouter.swift */,
+				7723A2A2F514FFA1648D9A37 /* AppTab.swift */,
+				769AA539D43E42EA80B3BC5A /* AuthenticatedShellView.swift */,
 				752695A44AB5CF906A3CD088 /* ChatCallApp.swift */,
 			);
 			path = App;
@@ -138,7 +167,9 @@
 		7B35255815EEE4D244BE69C2 /* ChatCallTests */ = {
 			isa = PBXGroup;
 			children = (
+				206B63EA4A97BEFE041FAD1B /* AsyncTestSupport.swift */,
 				26343FCE1C253FBE88908A07 /* AuthStoreTests.swift */,
+				14406D254BC5C6FE18450FF4 /* ConversationListStoreTests.swift */,
 				8C88325AD374FFBE79EC9E3C /* MockAuthClientTests.swift */,
 				932BC14055B87579E927E7C3 /* MockCallClientTests.swift */,
 				F7F6796365D877007A660240 /* MockChatClientTests.swift */,
@@ -183,6 +214,7 @@
 			isa = PBXGroup;
 			children = (
 				7ED37229EF0B9B55DA8EDC78 /* Auth */,
+				FA2BC7A32CB0F7B334F35CF6 /* Conversations */,
 			);
 			path = Features;
 			sourceTree = "<group>";
@@ -210,6 +242,7 @@
 		E1F06A66050F402C528F0555 /* ChatCallUITests */ = {
 			isa = PBXGroup;
 			children = (
+				19CF33AF6626CA54D59DA730 /* ConversationListTests.swift */,
 				B12B204AEC18981234362273 /* LaunchTests.swift */,
 				30A6D340F34D68EC3BE67E05 /* LoginFlowTests.swift */,
 			);
@@ -220,8 +253,22 @@
 			isa = PBXGroup;
 			children = (
 				C80A3A6C9ECB564D4C00FE1A /* AppTheme.swift */,
+				D6338228A45EFAC4609CBE97 /* AsyncStateView.swift */,
+				F7022D5CD77A27EA929746D9 /* AvatarView.swift */,
+				CD3B528F3FD122A5B355532B /* UnreadBadge.swift */,
 			);
 			path = DesignSystem;
+			sourceTree = "<group>";
+		};
+		FA2BC7A32CB0F7B334F35CF6 /* Conversations */ = {
+			isa = PBXGroup;
+			children = (
+				EE73371421C67CABBD090007 /* ConversationListFixtures.swift */,
+				DEA44074347F79A6A79D0AD9 /* ConversationListStore.swift */,
+				0F2956074A417F673081718A /* ConversationListView.swift */,
+				4CAF3092825321F5E2001D30 /* ConversationRow.swift */,
+			);
+			path = Conversations;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -332,6 +379,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F77F457273CF5475C70E08BB /* ConversationListTests.swift in Sources */,
 				7B51EB4B0B6F424296963019 /* LaunchTests.swift in Sources */,
 				6BA8038618DEE35E0145C7AD /* LoginFlowTests.swift in Sources */,
 			);
@@ -341,7 +389,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				584B3C458212F52ECC2400FC /* AsyncTestSupport.swift in Sources */,
 				C82139C7D2A9D2191E44A66A /* AuthStoreTests.swift in Sources */,
+				B3D2AE517D8982AE87B8D115 /* ConversationListStoreTests.swift in Sources */,
 				E09BB426378B36F87B0FE64A /* MockAuthClientTests.swift in Sources */,
 				651BDFDD4B6BE78FF5F58F07 /* MockCallClientTests.swift in Sources */,
 				9BF63487E4D59FAA1EB33539 /* MockChatClientTests.swift in Sources */,
@@ -355,15 +405,24 @@
 			files = (
 				0EE6996647326FED4B27ECD9 /* AppDependencies.swift in Sources */,
 				FAAF60A1747F5598BE7ED4C9 /* AppRootView.swift in Sources */,
+				AD64D2627DFF12D819D02F74 /* AppRouter.swift in Sources */,
+				FFA3A1CE87A8FFF11CF7BEFE /* AppTab.swift in Sources */,
 				B08194FDBEE39575DCAB1078 /* AppTheme.swift in Sources */,
+				FE1860837DD399EB974A2042 /* AsyncStateView.swift in Sources */,
 				6A42BFBC4F0AD899D029E9A3 /* AuthClient.swift in Sources */,
 				3053EE9467D86A33106016CB /* AuthModels.swift in Sources */,
 				CDC978A08B31EAB4C7665871 /* AuthStore.swift in Sources */,
+				0073CA33429060F054698C40 /* AuthenticatedShellView.swift in Sources */,
+				740F0CEDB0681F5BEE9FA5D5 /* AvatarView.swift in Sources */,
 				E5D992E107863B3409BADFF1 /* CallClient.swift in Sources */,
 				D336A5007EDCB259B10C3E93 /* CallModels.swift in Sources */,
 				37C63CC0797B41C29A2513E7 /* ChatCallApp.swift in Sources */,
 				7BF2B4B8301EFC8B0F4AB27A /* ChatClient.swift in Sources */,
 				51F8C1428C21C4CD41F8551A /* ChatModels.swift in Sources */,
+				D67C249BF8BB960B0BC34246 /* ConversationListFixtures.swift in Sources */,
+				2BA11C776DB0B4EFB50635F0 /* ConversationListStore.swift in Sources */,
+				421C5CF95406C1C9A7CC130F /* ConversationListView.swift in Sources */,
+				6A083770BA158A0406BAE4C6 /* ConversationRow.swift in Sources */,
 				1D2D1EC7492FF03707D68D39 /* DemoScheduler.swift in Sources */,
 				5139BB7851C13DF805CC945F /* LoginForm.swift in Sources */,
 				8E59B3E70DC5D4EF27A08D52 /* LoginView.swift in Sources */,
@@ -371,6 +430,7 @@
 				647CC7A6042EFE9F133AFEA4 /* MockCallClient.swift in Sources */,
 				28B7C632D4F3DA9487296688 /* MockChatClient.swift in Sources */,
 				E7B509EF94A72DA7C623705A /* MockSeed.swift in Sources */,
+				DAD1A5D0708ED65D197BD1AF /* UnreadBadge.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -10,9 +10,17 @@ nonisolated struct AppDependencies: Sendable {
     let scheduler: any DemoScheduler =
       arguments.contains("-demo-immediateEvents")
       ? ImmediateDemoScheduler() : RuntimeDemoScheduler()
+    let chat: any ChatClient
+    if arguments.contains("-demo-emptyConversations") {
+      chat = ConversationFixtureClient(fixture: .empty)
+    } else if arguments.contains("-demo-failConversationLoadOnce") {
+      chat = ConversationFixtureClient(fixture: .failOnce)
+    } else {
+      chat = MockChatClient(scheduler: scheduler)
+    }
     return AppDependencies(
       auth: MockAuthClient(scheduler: scheduler),
-      chat: MockChatClient(scheduler: scheduler),
+      chat: chat,
       calls: MockCallClient(scheduler: scheduler))
   }
 }

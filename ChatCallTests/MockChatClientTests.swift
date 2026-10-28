@@ -70,29 +70,34 @@ struct MockChatClientTests {
   func sendDeliveryOrder() async throws {
     let scheduler = ManualDemoScheduler()
     let client = MockChatClient(scheduler: scheduler)
-    var iterator = await client.events().makeAsyncIterator()
+    let probe = EventProbe<ChatEvent>()
+    await probe.start(stream: client.events())
+    defer { Task { await probe.cancel() } }
     let room = ConversationID("conversation-ava")
     let message = try await client.send(text: "  Hello Ava  ", to: room)
     #expect(message.text == "Hello Ava")
     #expect(message.deliveryState == .sending)
     #expect(message.sentAt == Date(timeIntervalSince1970: 1_700_000_001))
     #expect(try await client.messages(in: room).last == message)
-    #expect(await iterator.next() == .messageInserted(message))
-    guard case .conversationUpdated(let conversation) = await iterator.next() else {
+    try #require(await waitUntil { await probe.count >= 2 })
+    #expect(await probe.value(at: 0) == .messageInserted(message))
+    guard case .conversationUpdated(let conversation) = await probe.value(at: 1) else {
       Issue.record("Sending must also update the conversation preview")
       return
     }
     #expect(conversation.lastMessage == message)
     #expect(await scheduler.waitForPendingSleep())
     await scheduler.advance()
+    try #require(await waitUntil { await probe.count >= 3 })
     #expect(
-      await iterator.next()
+      await probe.value(at: 2)
         == .deliveryChanged(messageID: message.id, conversationID: room, state: .sent))
     #expect(try await client.messages(in: room).last?.deliveryState == .sent)
     #expect(await scheduler.waitForPendingSleep())
     await scheduler.advance()
+    try #require(await waitUntil { await probe.count >= 4 })
     #expect(
-      await iterator.next()
+      await probe.value(at: 3)
         == .deliveryChanged(messageID: message.id, conversationID: room, state: .delivered))
     #expect(try await client.messages(in: room).last?.deliveryState == .delivered)
     #expect(try await client.listConversations().first?.lastMessage?.deliveryState == .delivered)

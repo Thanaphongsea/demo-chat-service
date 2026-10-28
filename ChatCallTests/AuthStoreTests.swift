@@ -80,13 +80,23 @@ struct AuthStoreTests {
   func duplicateSubmit() async throws {
     let scheduler = ManualDemoScheduler()
     let store = filledStore(client: MockAuthClient(scheduler: scheduler))
-    let first = Task { await store.signIn() }
+    var firstFinished = false
+    let first = Task {
+      await store.signIn()
+      firstFinished = true
+    }
     defer { first.cancel() }
     try #require(await scheduler.waitForPendingSleep())
     store.username = "different"
-    await store.signIn()
+    var duplicateFinished = false
+    let duplicate = Task {
+      await store.signIn()
+      duplicateFinished = true
+    }
+    defer { duplicate.cancel() }
+    try #require(await waitUntil { duplicateFinished })
     await scheduler.advance()
-    await first.value
+    try #require(await waitUntil { firstFinished })
     guard case .authenticated(let session) = store.state else {
       Issue.record("A duplicate must not invalidate the original sign-in")
       return
