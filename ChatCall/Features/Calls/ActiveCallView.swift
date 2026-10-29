@@ -35,13 +35,15 @@ struct ActiveCallView: View {
           Label("Reconnecting…", systemImage: "wifi.exclamationmark")
             .foregroundStyle(.yellow).accessibilityIdentifier("call.reconnecting")
         } else {
-          Text("Simulated video and audio").font(.caption).foregroundStyle(.secondary)
+          if store.demoEnabled {
+            Text("Simulated video and audio").font(.caption).foregroundStyle(.secondary)
+          }
         }
       }
       GeometryReader { geometry in
         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
           ForEach(store.page.tiles) { tile in
-            VideoTileView(tile: tile).frame(height: max(140, (geometry.size.height - 12) / 2))
+            VideoTileView(tile: tile, isLocal: tile.user.id == call.localUserID, simulated: store.demoEnabled).frame(height: max(140, (geometry.size.height - 12) / 2))
           }
         }
       }

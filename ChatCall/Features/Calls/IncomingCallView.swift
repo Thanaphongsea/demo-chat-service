@@ -12,7 +12,9 @@ struct IncomingCallView: View {
       Text(call.displayName).font(.largeTitle.bold()).multilineTextAlignment(.center)
       Text(call.kind == .group ? "Incoming group video call" : "Incoming video call")
         .foregroundStyle(.secondary)
-      Text("Simulated video and audio").font(.caption).foregroundStyle(.secondary)
+      if store.demoEnabled {
+        Text("Simulated video and audio").font(.caption).foregroundStyle(.secondary)
+      }
       Spacer()
       GlassEffectContainer(spacing: 24) {
         HStack(spacing: 24) {

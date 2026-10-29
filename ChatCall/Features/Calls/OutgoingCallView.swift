@@ -10,7 +10,9 @@ struct OutgoingCallView: View {
       AvatarView(name: call.displayName, kind: call.kind == .group ? .group : .direct)
       Text(call.displayName).font(.title.bold()).multilineTextAlignment(.center)
       Text(status).font(.title2).accessibilityIdentifier("call.status")
-      Text("Simulated video and audio").font(.caption).foregroundStyle(.secondary)
+      if store.demoEnabled {
+        Text("Simulated video and audio").font(.caption).foregroundStyle(.secondary)
+      }
       Spacer()
       if call.state.isTerminal {
         Button("Done") { store.dismiss() }.buttonStyle(.glassProminent).controlSize(.large)

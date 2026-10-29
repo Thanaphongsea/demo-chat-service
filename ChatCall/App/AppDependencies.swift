@@ -76,7 +76,7 @@ nonisolated struct AppDependencies: Sendable {
       onSessionEnded: {
         await auth.signOut()
         signal.fire()
-      })
+      }, media: .live)
     return AppDependencies(
       auth: auth, chat: chat, calls: calls, sessionEnded: signal, demoCalls: false,
       stopBackgroundWork: {
