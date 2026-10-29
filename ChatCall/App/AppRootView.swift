@@ -10,6 +10,7 @@ struct AppRootView: View {
   @State private var auth: AuthStore
   @State private var router: AppRouter
   private let sessionEnded: SessionEndedSignal
+  @State private var push: PushKitAdapter?
 
   var gate: Gate {
     switch auth.state {
@@ -22,7 +23,8 @@ struct AppRootView: View {
   init(dependencies: AppDependencies = .mock()) {
     let auth = AuthStore(client: dependencies.auth)
     let router = AppRouter(
-      chatClient: dependencies.chat, callClient: dependencies.calls, demoCalls: dependencies.demoCalls)
+      chatClient: dependencies.chat, callClient: dependencies.calls, demoCalls: dependencies.demoCalls,
+      systemCalls: dependencies.systemCalls)
     let stop = dependencies.stopBackgroundWork
     auth.resetAuthenticatedState = { [weak router] in
       router?.reset()
@@ -47,6 +49,14 @@ struct AppRootView: View {
     .environment(auth)
     .task {
       for await _ in sessionEnded.stream() { await auth.sessionEnded() }
+    }
+    .task {
+      guard let coordinator = router.systemCalls, push == nil else { return }
+      let adapter = PushKitAdapter { callID, caller in
+        coordinator.handlePush(callID: callID, callerName: caller)
+      }
+      push = adapter
+      adapter.start()
     }
   }
 

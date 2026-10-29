@@ -16,9 +16,11 @@ struct AppDependenciesTests {
     #expect(live.demoCalls)
     let withVoIP = AppDependencies.live(
       configuration: .dev, gateway: GatewayConfiguration(httpBase: URL(string: "https://gw.test")!),
-      voip: VoIPConfiguration(baseURL: URL(string: "https://voip.test")!), arguments: [])
+      voip: VoIPConfiguration(baseURL: URL(string: "https://voip.test")!), useSystemCalls: false,
+      arguments: [])
     #expect(withVoIP.calls is LiveCallClient)
     #expect(!withVoIP.demoCalls)
+    #expect(withVoIP.systemCalls == nil)  // CallKit is off in this hermetic test
     let mock = AppDependencies.launch(arguments: ["-demo-mock"])
     #expect(mock.chat is MockChatClient)
   }

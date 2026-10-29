@@ -47,7 +47,10 @@ struct AuthenticatedShellView: View {
     .fullScreenCover(isPresented: $callStore.isPresented) {
       CallPresentationView(store: router.callStore)
     }
-    .task { await callStore.start() }
+    .task {
+      router.systemCalls?.start()
+      await callStore.start()
+    }
   }
 
   private var signOutButton: some View {

@@ -30,12 +30,15 @@ nonisolated struct AppDependencies: Sendable {
   let sessionEnded: SessionEndedSignal
   /// True while calls are the mock: the Calls tab then offers its demo actions.
   let demoCalls: Bool
+  /// The system call UI (CallKit); nil while calls are mocked.
+  let systemCalls: (any SystemCallAdapter)?
   /// Stops background work that outlives a screen, e.g. the realtime socket, on sign-out.
   let stopBackgroundWork: @Sendable () async -> Void
 
   init(
     auth: any AuthClient, chat: any ChatClient, calls: any CallClient,
     sessionEnded: SessionEndedSignal = SessionEndedSignal(), demoCalls: Bool = true,
+    systemCalls: (any SystemCallAdapter)? = nil,
     stopBackgroundWork: @escaping @Sendable () async -> Void = {}
   ) {
     self.auth = auth
@@ -43,6 +46,7 @@ nonisolated struct AppDependencies: Sendable {
     self.calls = calls
     self.sessionEnded = sessionEnded
     self.demoCalls = demoCalls
+    self.systemCalls = systemCalls
     self.stopBackgroundWork = stopBackgroundWork
   }
 
@@ -50,7 +54,7 @@ nonisolated struct AppDependencies: Sendable {
   /// (`-voipURL`); otherwise they stay mocked.
   static func live(
     configuration: AuthConfiguration, gateway: GatewayConfiguration = GatewayConfiguration(),
-    voip: VoIPConfiguration? = VoIPConfiguration(),
+    voip: VoIPConfiguration? = VoIPConfiguration(), useSystemCalls: Bool = true,
     arguments: [String] = ProcessInfo.processInfo.arguments
   ) -> AppDependencies {
     let mocked = mock(arguments: arguments)
@@ -70,6 +74,7 @@ nonisolated struct AppDependencies: Sendable {
         auth: auth, chat: chat, calls: mocked.calls, sessionEnded: signal,
         stopBackgroundWork: { await chat.stopRealtime() })
     }
+    let systemCalls: (any SystemCallAdapter)? = useSystemCalls ? CallKitAdapter() : nil
     let calls = LiveCallClient(
       api: VoIPClient(configuration: voip, tokens: auth),
       currentUser: { await auth.currentSession?.user },
@@ -79,6 +84,7 @@ nonisolated struct AppDependencies: Sendable {
       }, media: .live)
     return AppDependencies(
       auth: auth, chat: chat, calls: calls, sessionEnded: signal, demoCalls: false,
+      systemCalls: systemCalls,
       stopBackgroundWork: {
         await chat.stopRealtime()
         await calls.stopMonitoring()
