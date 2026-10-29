@@ -67,3 +67,115 @@ nonisolated struct WireConversation: Decodable, Sendable, Equatable {
     case unreadCount, lastMessage, showName, time = "MsgTime"
   }
 }
+
+// MARK: requests and responses
+
+nonisolated struct ConversationListRequest: Encodable, Sendable {
+  let from: String
+  let timeStamp: Double
+  let startIndex: Int
+  let topTimeStamp: Double
+  let topStartIndex: Int
+  /// 63 asks for the complete answer, folders included.
+  let assistFlags = 63
+  /// 0 all, 1 C2C, 2 group.
+  let contactType = 0
+
+  private enum CodingKeys: String, CodingKey {
+    case from = "From_Account", timeStamp = "TimeStamp", startIndex = "StartIndex"
+    case topTimeStamp = "TopTimeStamp", topStartIndex = "TopStartIndex"
+    case assistFlags = "AssistFlags", contactType = "ContactType"
+  }
+}
+
+nonisolated struct ConversationListResponse: Decodable, Sendable {
+  let items: [WireConversation]?
+  /// 1 normal list exhausted, 2 pinned list exhausted, 3 both.
+  let completeFlag: Int?
+  let timeStamp: Double?
+  let startIndex: Int?
+  let topTimeStamp: Double?
+  let topStartIndex: Int?
+
+  private enum CodingKeys: String, CodingKey {
+    case items = "SessionItem", completeFlag = "CompleteFlag", timeStamp = "TimeStamp"
+    case startIndex = "StartIndex", topTimeStamp = "TopTimeStamp", topStartIndex = "TopStartIndex"
+  }
+}
+
+nonisolated struct GroupMembersRequest: Encodable, Sendable {
+  let groupID: String
+  let limit: Int
+  let offset: Int
+  private enum CodingKeys: String, CodingKey {
+    case groupID = "GroupId", limit = "Limit", offset = "Offset"
+  }
+}
+
+nonisolated struct GroupMembersResponse: Decodable, Sendable {
+  struct Member: Decodable, Sendable { let account: String?
+    private enum CodingKeys: String, CodingKey { case account = "Member_Account" }
+  }
+  /// Total after filtering, not the size of the page.
+  let memberCount: Int?
+  let members: [Member]?
+  private enum CodingKeys: String, CodingKey { case memberCount = "MemberNum", members = "MemberList" }
+}
+
+nonisolated struct DirectHistoryRequest: Encodable, Sendable {
+  let operatorAccount: String
+  let peerAccount: String
+  /// The server ceiling is 20 and it does not clamp: a larger value is an error.
+  let maxCount = 20
+  let lastMsgKey = ""
+  let maxTime = 0
+  private enum CodingKeys: String, CodingKey {
+    case operatorAccount = "Operator_Account", peerAccount = "Peer_Account"
+    case maxCount = "MaxCnt", lastMsgKey = "LastMsgKey", maxTime = "MaxTime"
+  }
+}
+
+nonisolated struct GroupHistoryRequest: Encodable, Sendable {
+  let groupID: String
+  let requestSeq = 0
+  let requestCount = 20
+  let withRecalled = 1
+  private enum CodingKeys: String, CodingKey {
+    case groupID = "GroupId", requestSeq = "ReqMsgSeq", requestCount = "ReqMsgNumber"
+    case withRecalled = "WithRecalledMsg"
+  }
+}
+
+nonisolated struct HistoryResponse: Decodable, Sendable {
+  let messages: [WireMessage]?
+  private enum CodingKeys: String, CodingKey { case messages = "MsgList" }
+}
+
+nonisolated struct PortraitRequest: Encodable, Sendable {
+  let accounts: [String]
+  let tags = ["Tag_Profile_IM_Nick"]
+  private enum CodingKeys: String, CodingKey { case accounts = "To_Account", tags = "TagList" }
+}
+
+nonisolated struct PortraitResponse: Decodable, Sendable {
+  struct Item: Decodable, Sendable {
+    struct Tag: Decodable, Sendable {
+      let name: String?
+      let value: String?
+      private enum CodingKeys: String, CodingKey { case name = "Tag", value = "Value" }
+      init(from decoder: any Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        name = try? values.decode(String.self, forKey: .name)
+        value = try? values.decode(String.self, forKey: .value)
+      }
+    }
+    let account: String?
+    let resultCode: Int?
+    let tags: [Tag]?
+    private enum CodingKeys: String, CodingKey {
+      case account = "To_Account", resultCode = "ResultCode", tags = "ProfileItem"
+    }
+  }
+  let items: [Item]?
+  private enum CodingKeys: String, CodingKey { case items = "UserProfileItem" }
+}
