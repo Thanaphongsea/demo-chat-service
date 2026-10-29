@@ -19,5 +19,7 @@ nonisolated protocol CallClient: Sendable {
   func demoIncomingCall(kind: CallKind) async throws -> CallSnapshot
   func demoMissedCall(kind: CallKind) async throws -> CallSnapshot
   func demoReconnect(callID: CallID) async throws -> CallSnapshot
+  /// Look for calls now (a VoIP push says one may be ringing) instead of waiting for the next poll.
+  func reconcile() async
   func events() async -> AsyncStream<CallEvent>
 }

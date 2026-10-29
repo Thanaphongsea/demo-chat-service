@@ -171,6 +171,8 @@ actor LiveCallClient: CallClient {
     }
   }
 
+  func reconcile() async { await poll() }
+
   func setVisibleVideoPeers(_ users: [UserID], callID: CallID) async {
     visibleVideo = users
     guard mediaCallID == callID else { return }
