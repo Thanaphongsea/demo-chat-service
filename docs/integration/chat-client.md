@@ -1,6 +1,6 @@
 # ChatClient integration contract
 
-`Core/Clients/ChatClient.swift` returns domain values, not transport DTOs. Replace the shared `chat` dependency in `AppDependencies` so list, compose, room, and call roster reads share the same source. `LiveChatClient` now implements this protocol against the Jasmine gateway (REST `/v4/<operation>` plus the Centrifugo socket); the mapping below is taken from the reference web app (`chat-service-dev-webapp/webapp/lib`). It is unit-tested against scripted responses only and has **not** yet been exercised against the dev stack. `Codable` on a domain type is not a wire-contract decision.
+`Core/Clients/ChatClient.swift` returns domain values, not transport DTOs. Replace the shared `chat` dependency in `AppDependencies` so list, compose, room, and call roster reads share the same source. `LiveChatClient` now implements this protocol against the Jasmine gateway (REST `/v4/<operation>` plus the Centrifugo socket); the mapping below is taken from the reference web app (`chat-service-dev-webapp/webapp/lib`). It is unit-tested against scripted responses and was exercised once against the dev gateway on 2026-10-29 with the `u_alice`/`u_bob` test accounts (see *Dev-stack check* below). `Codable` on a domain type is not a wire-contract decision.
 
 ## Live adapter (as built)
 
@@ -13,6 +13,10 @@
 | `createDirect(with:)` | None: a direct conversation exists after the first message | Name is the user id until the next list refresh. |
 | `createGroup(name:members:)` | `group_open_http_svc/create_group` (`Type: Public`, at most 50 listed members) | Needs two other members. |
 | `events()` | Centrifugo, server-side channel `user:<me>`: `onRecvNewMessage`, `onNewConversation`/`onConversationChanged`, `onRecvC2CReadReceipt`, `onKickedOffline` | `delivered` means the peer read a 1:1 message; group messages stay `sent`. A reconnect re-reads the conversation list but does not backfill an open room's messages. Other events are ignored. |
+
+### Dev-stack check (2026-10-29)
+
+`LiveStackSmokeTests` (opt-in, needs `TEST_RUNNER_CHATCALL_LIVE_PASSWORD`; it sends one message from `u_alice` to `u_bob`) passed against the dev gateway: login with `device_id` (the token carries `dev`, `sid` and `channels: [user:<me>]`), conversation list with a 3-member group roster, the DM history, the derived user list, a REST send, and delivery of that same message id to Bob over the Centrifugo socket. Observed: the only existing DM message is an E2EE `TIMCustomElem` (`jasmine/e2ee-signal`), so it shows as "[Unsupported message]". Not yet exercised against the real stack: group send/create, read receipts, reconnect resync, token refresh in a long session, kick/revoke.
 
 Behaviours worth knowing: non-text message bodies (images, E2EE `TIMCustomElem`) show as "[Unsupported message]"; recalled messages show "Message was recalled"; every `/v4` answer is checked for a non-zero `ErrorCode` even on HTTP 200; a revoked (70009) or unauthorised answer ends the session and returns the app to Login. Launch override: `-gatewayURL`.
 
@@ -33,7 +37,7 @@ The mock publishes insert and conversation-preview updates before `send` returns
 
 ## Mock replacement checklist
 
-- [ ] Supply official chat gateway docs and **test accounts**; the current mapping comes from the reference web app. (Authentication is mapped: same JWT as VoIP.)
+- [x] Test accounts and a reachable gateway supplied (dev tunnel, `u_alice`/`u_bob`). Still no official gateway docs: the mapping comes from the reference web app. Authentication is the same JWT as VoIP.
 - [x] Map every method and event above, including complete roster pagination for group calling (see *Live adapter*).
 - [ ] Agree snapshot/subscription cursor, reconnect/replay, deduplication, idempotency, ambiguous-send retry and read/unread policies.
 - [ ] Resolve historical sender names independently of selectable-user availability; define a fallback and directory failure policy.

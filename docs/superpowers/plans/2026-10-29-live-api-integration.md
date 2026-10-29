@@ -1,6 +1,6 @@
 # Live API Integration (Auth hardening + Chat) Implementation Plan
 
-> **Status (2026-10-29):** Tasks 1–7 implemented and unit-tested (152 tests pass). Task 8's dev-stack run is still to do: it needs test accounts and a reachable gateway. Decisions D1–D5 are settled (see the Q&A in the session: separate gateway/VoIP config, directory derived from conversations, non-text bodies as placeholder, `centrifuge-swift` 0.10.4, group call per handoff).
+> **Status (2026-10-29):** Tasks 1–7 implemented and unit-tested (152 tests pass). Task 8: a first dev-stack run passed (login, list, roster, history, users, send, socket delivery); group send/create, read receipts, resync and refresh/kick are still unverified live. Decisions D1–D5 are settled (see the Q&A in the session: separate gateway/VoIP config, directory derived from conversations, non-text bodies as placeholder, `centrifuge-swift` 0.10.4, group call per handoff).
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
