@@ -55,4 +55,6 @@ nonisolated enum AuthError: Error, Equatable, Sendable {
   /// Network failure, rate limiting, or a server error; the credentials were not rejected.
   case unavailable
   case invalidResponse
+  /// The server ended this session (kicked); refreshing cannot succeed, so sign in again.
+  case revoked
 }

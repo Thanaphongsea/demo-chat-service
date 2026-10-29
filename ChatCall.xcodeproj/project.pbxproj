@@ -53,6 +53,7 @@
 		8E59B3E70DC5D4EF27A08D52 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEE2E271EB63263C19549235 /* LoginView.swift */; };
 		9ABCE09E93CFC4C6B78ACCFC /* ChatRoomFixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A515220D15698E41ED04378 /* ChatRoomFixtures.swift */; };
 		9BF63487E4D59FAA1EB33539 /* MockChatClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7F6796365D877007A660240 /* MockChatClientTests.swift */; };
+		9D32B116876927D75AD99471 /* AccessTokenProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C1D2E9C7C95173A0357B600 /* AccessTokenProvider.swift */; };
 		9E9F06CE14C4F3621F626D46 /* ActiveCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95CCEDEF46CD4A28D397F3A3 /* ActiveCallView.swift */; };
 		AB3BEC7105C1E2DE9ACAB4C3 /* VideoPageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35B0279E3A33B33AE7B2455B /* VideoPageTests.swift */; };
 		AD64D2627DFF12D819D02F74 /* AppRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FBF1019B419DD1D616755B3 /* AppRouter.swift */; };
@@ -145,6 +146,7 @@
 		96E6F2926C0EEA61115CAC77 /* AppRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRootView.swift; sourceTree = "<group>"; };
 		97B9704568A4FD06C6B00B04 /* AuthClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthClient.swift; sourceTree = "<group>"; };
 		97BFCF43E6AAC6C036A245A0 /* CallStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallStore.swift; sourceTree = "<group>"; };
+		9C1D2E9C7C95173A0357B600 /* AccessTokenProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AccessTokenProvider.swift; sourceTree = "<group>"; };
 		9C980DBC270CE874199A8B82 /* VideoPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPage.swift; sourceTree = "<group>"; };
 		9F105320EAB6BE60F1D59980 /* MockSeed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockSeed.swift; sourceTree = "<group>"; };
 		9FBF1019B419DD1D616755B3 /* AppRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRouter.swift; sourceTree = "<group>"; };
@@ -318,6 +320,7 @@
 				04BBDBE4E8B220CC2AA55EE9 /* HTTPTransport.swift */,
 				E98A4B45FAF6DF8599058075 /* LiveAuthClient.swift */,
 				F9F95C68C6FA715825599B19 /* SessionStore.swift */,
+				9C1D2E9C7C95173A0357B600 /* AccessTokenProvider.swift */,
 			);
 			path = Clients;
 			sourceTree = "<group>";
@@ -401,8 +404,6 @@
 				B549A26D9B019D1FAFCEA683 /* PBXTargetDependency */,
 			);
 			name = ChatCallUITests;
-			packageProductDependencies = (
-			);
 			productName = ChatCallUITests;
 			productReference = 5C167F6965D067730C45E197 /* ChatCallUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
@@ -419,8 +420,6 @@
 				6680E33A3A533986764B7A19 /* PBXTargetDependency */,
 			);
 			name = ChatCallTests;
-			packageProductDependencies = (
-			);
 			productName = ChatCallTests;
 			productReference = 20FC7F434BA48B80FA042BD3 /* ChatCallTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -437,8 +436,6 @@
 			dependencies = (
 			);
 			name = ChatCall;
-			packageProductDependencies = (
-			);
 			productName = ChatCall;
 			productReference = B7CDCD907BD3B2CF7310421D /* ChatCall.app */;
 			productType = "com.apple.product-type.application";
@@ -579,6 +576,7 @@
 				DAD1A5D0708ED65D197BD1AF /* UnreadBadge.swift in Sources */,
 				69929D6FAF11C7F1A63AA5E5 /* VideoPage.swift in Sources */,
 				D0457980650677626AACA167 /* VideoTileView.swift in Sources */,
+				9D32B116876927D75AD99471 /* AccessTokenProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

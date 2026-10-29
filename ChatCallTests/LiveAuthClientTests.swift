@@ -46,7 +46,7 @@ nonisolated struct LiveAuthClientTests {
     return (
       LiveAuthClient(
         configuration: Self.configuration, transport: transport, store: store,
-        now: { Self.now }),
+        deviceID: "ios-test-device", now: { Self.now }),
       transport
     )
   }
@@ -62,7 +62,11 @@ nonisolated struct LiveAuthClientTests {
     #expect(request.httpMethod == "POST")
     let body = try #require(request.httpBody)
     let json = try #require(try JSONSerialization.jsonObject(with: body) as? [String: String])
-    #expect(json == ["user_id": "u_alice", "app_id": "1400000000", "password": "secret123"])
+    #expect(
+      json == [
+        "user_id": "u_alice", "app_id": "1400000000", "password": "secret123",
+        "device_id": "ios-test-device"
+      ])
     #expect(session.user.id == UserID("u_alice"))
     #expect(
       session.accessToken?.expiresAt == ISO8601DateFormatter().date(from: "2027-01-15T09:00:00Z"))
@@ -142,6 +146,132 @@ nonisolated struct LiveAuthClientTests {
     await #expect(throws: CancellationError.self) { try await task.value }
     #expect(await client.currentSession == nil)
     #expect(store.load() == nil)
+  }
+
+  // MARK: token lifecycle
+
+  private func signedInClient(
+    store: InMemorySessionStore = InMemorySessionStore(), expires: String,
+    refresh: @escaping @Sendable (URLRequest) async throws -> (Int, Data)
+  ) async throws -> (LiveAuthClient, StubTransport) {
+    let (client, transport) = client(store: store) { request in
+      request.url?.path == "/v1/token" ? Self.ok(expires: expires) : try await refresh(request)
+    }
+    _ = try await client.signIn(
+      credentials: Credentials(identity: "u_alice", password: "secret123"))
+    return (client, transport)
+  }
+
+  private static func refreshed(_ token: String = "new-token") -> (Int, Data) {
+    (200, Data(#"{"token":"\#(token)","expires_at":"2027-01-15T10:00:00Z"}"#.utf8))
+  }
+
+  // `now` is 2027-01-15T08:00:00Z.
+  @Test("A token within 60 seconds of expiry is refreshed with the old token as bearer")
+  func refreshesNearExpiry() async throws {
+    let store = InMemorySessionStore()
+    let (client, transport) = try await signedInClient(
+      store: store, expires: "2027-01-15T08:00:30Z"
+    ) { _ in Self.refreshed() }
+    let old = Self.jwt(sub: "u_alice")
+    let token = try await client.validToken()
+    let request = try #require(transport.requests.last)
+    #expect(request.url?.path == "/v1/token/refresh")
+    #expect(request.httpMethod == "POST")
+    #expect(request.value(forHTTPHeaderField: "Authorization") == "Bearer \(old)")
+    #expect(token.value == "new-token")
+    #expect(await client.currentSession?.accessToken?.value == "new-token")
+    #expect(store.load()?.accessToken?.value == "new-token")
+  }
+
+  @Test("A fresh token is returned without a request")
+  func freshTokenNoRequest() async throws {
+    let (client, transport) = try await signedInClient(expires: "2027-01-15T08:10:00Z") { _ in
+      Self.refreshed()
+    }
+    let token = try await client.validToken()
+    #expect(token.value == Self.jwt(sub: "u_alice"))
+    #expect(transport.requests.count == 1)
+  }
+
+  @Test("Concurrent callers share a single refresh request")
+  func concurrentRefreshShared() async throws {
+    let gate = AsyncStream<Void>.makeStream()
+    let (client, transport) = try await signedInClient(expires: "2027-01-15T08:00:30Z") { _ in
+      for await _ in gate.stream { break }
+      return Self.refreshed()
+    }
+    async let first = client.validToken()
+    async let second = client.validToken()
+    while transport.requests.count < 2 { await Task.yield() }
+    for _ in 0..<20 { await Task.yield() }
+    gate.continuation.yield()
+    let tokens = try await [first, second]
+    #expect(tokens.map(\.value) == ["new-token", "new-token"])
+    #expect(transport.requests.filter { $0.url?.path == "/v1/token/refresh" }.count == 1)
+  }
+
+  @Test("A rejected token is refreshed on the next request even when it looks fresh")
+  func invalidateForcesRefresh() async throws {
+    let (client, transport) = try await signedInClient(expires: "2027-01-15T08:10:00Z") { _ in
+      Self.refreshed()
+    }
+    let first = try await client.validToken()
+    await client.invalidate(first)
+    #expect(try await client.validToken().value == "new-token")
+    #expect(transport.requests.count == 2)
+  }
+
+  @Test("Refresh 401 with code 70009 is revoked: session cleared, never retried")
+  func refreshRevoked() async throws {
+    let store = InMemorySessionStore()
+    let (client, transport) = try await signedInClient(
+      store: store, expires: "2027-01-15T08:00:30Z"
+    ) { _ in (401, Data(#"{"ErrorCode":70009}"#.utf8)) }
+    await #expect(throws: AuthError.revoked) { try await client.validToken() }
+    #expect(await client.currentSession == nil)
+    #expect(store.load() == nil)
+    await #expect(throws: AuthError.invalidCredentials) { try await client.validToken() }
+    #expect(transport.requests.filter { $0.url?.path == "/v1/token/refresh" }.count == 1)
+  }
+
+  @Test("Refresh 401 with another code (either field spelling) ends the session")
+  func refreshExpired() async throws {
+    for body in [#"{"ErrorCode":70001}"#, #"{"code":70003}"#, "{}"] {
+      let store = InMemorySessionStore()
+      let (client, _) = try await signedInClient(
+        store: store, expires: "2027-01-15T08:00:30Z"
+      ) { _ in (401, Data(body.utf8)) }
+      await #expect(throws: AuthError.invalidCredentials) { try await client.validToken() }
+      #expect(await client.currentSession == nil)
+      #expect(store.load() == nil)
+    }
+  }
+
+  @Test("A server error during refresh keeps the session and reports unavailable")
+  func refreshUnavailableKeepsSession() async throws {
+    let (client, _) = try await signedInClient(expires: "2027-01-15T08:00:30Z") { _ in
+      (503, Data())
+    }
+    await #expect(throws: AuthError.unavailable) { try await client.validToken() }
+    #expect(await client.currentSession != nil)
+  }
+
+  @Test("Signed out, validToken asks for sign-in and makes no request")
+  func validTokenWithoutSession() async {
+    let (client, transport) = client { _ in Self.ok() }
+    await #expect(throws: AuthError.invalidCredentials) { try await client.validToken() }
+    #expect(transport.requests.isEmpty)
+  }
+
+  @Test("The device id is generated once and then reused")
+  func deviceIdentifierIsStable() throws {
+    let suite = "LiveAuthClientTests.device"
+    let defaults = try #require(UserDefaults(suiteName: suite))
+    defer { defaults.removePersistentDomain(forName: suite) }
+    let first = DeviceIdentifier.current(defaults: defaults)
+    #expect(first.hasPrefix("ios-"))
+    #expect(DeviceIdentifier.current(defaults: defaults) == first)
   }
 
   @Test("Configuration defaults to dev and accepts valid launch overrides only")
