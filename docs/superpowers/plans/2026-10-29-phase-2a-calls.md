@@ -55,5 +55,8 @@
 
 ### Task 6: Wiring and docs — `AppDependencies.live` uses `LiveCallClient` when a VoIP URL is configured, else keeps the mock; update `docs/integration/call-client.md`. Full unit suite green.
 
+## Done after 2A (same session)
+Phases 2B and 2C were built on top of this: see `docs/integration/call-client.md`, *Media and system calls*. Unit tests: 241 pass, 1 skipped. Nothing in 2B/2C has been verified against a real service or device.
+
 ## Not in 2A
 ICE, `/api/rooms`, WebSocket, WebRTC, CallKit, PushKit/APNs (Phase 2B/2C). **Live verification needs a reachable VoIP origin**: neither the dev tunnel (`/api/*` is 404) nor `localhost:8080` serves it today.

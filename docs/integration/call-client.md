@@ -41,7 +41,23 @@ The handoff is the future source for HTTP actions, authenticated native WebSocke
 | Incoming and joinable calls | `GET /api/calls?peer_id=` every 1 s while idle |
 | Lease | `heartbeat` every 10 s while joined (direct ringing calls are only read) |
 
-The personal `status`, shared `group_status` and `can_join` are mapped by `CallMapper` into `CallSnapshot` (`canJoin`, `localUserID`). A creator who leaves a group others still occupy is `.ended` for them but can rejoin. Transient poll failures never end a call; 404/403 end it locally; 401 returns the app to Login. Local microphone, camera, speaker and flip toggles change the snapshot only. **Not built yet:** ICE, `/api/rooms`, the media WebSocket, WebRTC (phase 2B), CallKit/PushKit/APNs (2C), a persistent history API, and a call-time roster refresh beyond the store's existing conversation refresh.
+The personal `status`, shared `group_status` and `can_join` are mapped by `CallMapper` into `CallSnapshot` (`canJoin`, `localUserID`). A creator who leaves a group others still occupy is `.ended` for them but can rejoin. Transient poll failures never end a call; 404/403 end it locally; 401 returns the app to Login. Local microphone, camera, speaker and flip toggles change the snapshot only. **Not built:** a persistent history API, and a call-time roster refresh beyond the store's existing conversation refresh. Media and system integration follow below.
+
+## Media and system calls (phases 2B and 2C)
+
+Everything below is built and unit-tested against fakes, but **none of it has run against a real VoIP service, SFU, iPhone camera/microphone, CallKit UI or push**. No VoIP origin was reachable, the simulator has no camera, and the backend sends no APNs VoIP push.
+
+**Media (`MediaSession`, `WebRTCPeer`).** When the server sees this device as `accepted` in a call that is still running (a group creator is in the room while the screen still rings), the client opens the room (`POST /api/rooms`), reads `/api/ice`, creates the peer connection, opens the media socket with an `Authorization` header (never in the URL), sends `video_subscriptions` **before** the first offer, then answers every server offer one at a time and queues remote ICE until a remote description is set. Roster comes from `room_peers`/`peer_joined`/`peer_left` (not from tracks), so audio-only members keep a tile. The screen asks for video only for the current page's three remotes. A lost socket recovers on a new generation, at most three times after 1, 2 and 3 seconds, checking the call's state with the server first; a successful answer resets the count, a definitive "no" (403/404, or no longer accepted) stops recovery and ends the call locally. Microphone permission denied is fatal for the call; camera denied continues audio-only.
+
+**Dependency.** WebRTC is `stasel/WebRTC` 155.0.0 (a third-party prebuilt Google WebRTC xcframework, pinned; 156.0.0 was only two days old). The handoff says the team should choose and pin its own build; building from the upstream sources is the alternative if a prebuilt binary is not acceptable. `centrifuge-swift` 0.10.4 stays for chat.
+
+**System calls (`SystemCallCoordinator`, `CallKitAdapter`).** Incoming, outgoing and ended calls are reported to CallKit; answer, end and mute from the system UI drive the store; CallKit's audio activation is handed to WebRTC (`AudioSessionController`). With CallKit the in-app incoming screen and the system banner both appear.
+
+**Push (`PushKitAdapter`).** It registers for VoIP pushes, reports each one to CallKit immediately, then reconciles with the server and ends the system call as unanswered if no matching call appears. The payload keys it reads (`call_id`, `caller_name`) are **a proposal**, not a contract. The token goes to `VoIPPushTokenSink`, whose only implementation logs that nothing was uploaded: the backend has no APNs VoIP registry or sender, and a PushKit token must never go to the FCM endpoint.
+
+**Capabilities.** `NSCameraUsageDescription`, `NSMicrophoneUsageDescription` and background modes `audio` and `voip` are set. Push Notifications/VoIP entitlements, bundle id, team and APNs environments still need the team's signing setup.
+
+**Known risks to test on devices.** Receiver reuse after renegotiation (video is mapped by stream id, which the SFU sets to the user id); the 45-second lease versus the app being suspended or locked (heartbeats are a polling-loop timer, not a background task); Bluetooth and route changes; 16-camera load; iPhone-to-Web/Android interop; and dropping the media socket when the app is backgrounded. `LiveCallSmokeTests` (signalling only) is ready to run with `TEST_RUNNER_CHATCALL_LIVE_PASSWORD` and `TEST_RUNNER_CHATCALL_VOIP_URL`.
 
 ## Cancellation, ordering and idempotency
 
@@ -57,11 +73,11 @@ The mock's immediate actor mutations are not network idempotency guarantees. The
 - [ ] Supply identity/token refresh and authorized user/device/session mappings; remove mock `user-me` assumptions. Never put JWT in URLs/logs.
 - [ ] Resolve complete roster freshness and >16/missing-member errors; preserve one-tap call-all behavior.
 - [x] Bounded create retry with fixed idempotency key/payload; busy/conflict mapped (unit-tested; not yet run against a real service).
-- [ ] Implement accepted-only media: room preparation, dynamic ICE, authenticated native socket, serialized SDP/server offers, pre-description ICE queue and track mapping from SDP mid/msid.
-- [ ] Send video subscriptions for each page/roster/reconnect: local plus three stable remote slots, audio for everyone, audio-only members retain slots. Hiding tiles alone is insufficient.
+- [x] Accepted-only media: room preparation, dynamic ICE, authenticated socket, serialized SDP/server offers, pre-description ICE queue (tracks are mapped by stream id, not yet by mid; needs a device).
+- [x] Video subscriptions for each page/roster/reconnect, before the first offer; audio-only members keep a slot.
 - [x] Separate polling and heartbeat duties implemented and unit-tested; lifecycle suspension on a physical iPhone still to be tested.
-- [ ] Add generation-guarded recovery, teardown, permissions/audio routing/interruption, pinned WebRTC build and iPhone↔Web↔Kotlin interoperability tests from the acceptance checklist.
-- [ ] Design APNs VoIP registry/sender, token rotation/environment/topic and CallKit/PushKit integration with backend. The supplied backend currently has FCM registration/sending only; a PushKit token must never be sent to that FCM endpoint.
+- [x] Generation-guarded recovery, teardown, permissions, audio session, pinned WebRTC build. Still open: interruption/route changes and iPhone↔Web↔Kotlin interoperability tests on devices.
+- [ ] APNs VoIP registry/sender, token rotation/environment/topic: **backend work, not done.** CallKit and the PushKit receiver exist on the app side; the token sink has no uploader and the payload is a proposal.
 - [ ] Supply persistent history/error contracts and select production bundle/team/capabilities; no Apple signing material belongs in this repository.
 
 Live HTTP/WebSocket/WebRTC, Join/Rejoin, CallKit/PushKit, APNs and real background/media validation remain deferred. Passing this mock app's simulator checks is not evidence for live interoperability, background delivery or 16-camera capacity.
