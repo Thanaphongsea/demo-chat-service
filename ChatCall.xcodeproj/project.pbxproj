@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		0073CA33429060F054698C40 /* AuthenticatedShellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 769AA539D43E42EA80B3BC5A /* AuthenticatedShellView.swift */; };
 		0A11AA7B18A0504BEFCBF961 /* DateSeparator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60CA0C4A65975950FFCA4273 /* DateSeparator.swift */; };
+		0AA945321CA510EF6BD68680 /* CallMapperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76DCCC91DAC111452639C3A6 /* CallMapperTests.swift */; };
 		0CC7A08B4D526CBBA199D508 /* HTTPTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04BBDBE4E8B220CC2AA55EE9 /* HTTPTransport.swift */; };
 		0E59E58511F2AE41E8389872 /* IntegrationQATests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0732DBE339E1775D1C64A839 /* IntegrationQATests.swift */; };
 		0EE6996647326FED4B27ECD9 /* AppDependencies.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0596FAD598EAC043BDA7DE1A /* AppDependencies.swift */; };
@@ -89,6 +90,7 @@
 		E5D992E107863B3409BADFF1 /* CallClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = D71E3DC1B7C005595059D80E /* CallClient.swift */; };
 		E726518FDDD4CA2B3EC8C5DA /* VoIPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2A77C257760542A0C6B7751 /* VoIPClient.swift */; };
 		E7B509EF94A72DA7C623705A /* MockSeed.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F105320EAB6BE60F1D59980 /* MockSeed.swift */; };
+		E9E1185238A4F78B732ADB6E /* CallMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6ADA7DC558AFC8D9F711AE2 /* CallMapper.swift */; };
 		ED375ED68706874968D2934F /* ChatMapperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AAE22E8BF35572185E72A68 /* ChatMapperTests.swift */; };
 		F094FEDDD2192A20F09AB09D /* NewConversationStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB7B74466983C780CCC3AE3D /* NewConversationStoreTests.swift */; };
 		F41CAD66A609AB507F8082B4 /* CallStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97BFCF43E6AAC6C036A245A0 /* CallStore.swift */; };
@@ -165,6 +167,7 @@
 		6F0F29EF69F0F012731466AC /* GatewayConfiguration.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GatewayConfiguration.swift; sourceTree = "<group>"; };
 		752695A44AB5CF906A3CD088 /* ChatCallApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatCallApp.swift; sourceTree = "<group>"; };
 		769AA539D43E42EA80B3BC5A /* AuthenticatedShellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticatedShellView.swift; sourceTree = "<group>"; };
+		76DCCC91DAC111452639C3A6 /* CallMapperTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CallMapperTests.swift; sourceTree = "<group>"; };
 		7723A2A2F514FFA1648D9A37 /* AppTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTab.swift; sourceTree = "<group>"; };
 		78859104AC71B4A7A684624C /* LiveChatClientTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LiveChatClientTests.swift; sourceTree = "<group>"; };
 		846118260E13679D3695FDD8 /* NewConversationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewConversationView.swift; sourceTree = "<group>"; };
@@ -184,6 +187,7 @@
 		9F105320EAB6BE60F1D59980 /* MockSeed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockSeed.swift; sourceTree = "<group>"; };
 		9FBF1019B419DD1D616755B3 /* AppRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRouter.swift; sourceTree = "<group>"; };
 		A0B7E707AF66449E13DC0BE8 /* ChatMapper.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ChatMapper.swift; sourceTree = "<group>"; };
+		A6ADA7DC558AFC8D9F711AE2 /* CallMapper.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CallMapper.swift; sourceTree = "<group>"; };
 		AB7B74466983C780CCC3AE3D /* NewConversationStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewConversationStoreTests.swift; sourceTree = "<group>"; };
 		B12B204AEC18981234362273 /* LaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchTests.swift; sourceTree = "<group>"; };
 		B7CDCD907BD3B2CF7310421D /* ChatCall.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ChatCall.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -288,6 +292,7 @@
 				560A946B02BB2F719DE1BF18 /* LiveChatClient.swift */,
 				6307298AE5D0EF31B10D2BB2 /* RealtimeEvent.swift */,
 				2A060C13B3BD013A10651432 /* CentrifugoRealtime.swift */,
+				A6ADA7DC558AFC8D9F711AE2 /* CallMapper.swift */,
 			);
 			path = Live;
 			sourceTree = "<group>";
@@ -363,6 +368,7 @@
 				18EED4DE65063E9A5874F341 /* AppDependenciesTests.swift */,
 				6C678A5637DF690EDA00F4FF /* LiveStackSmokeTests.swift */,
 				9B4067A2CD124024D63D9634 /* VoIPClientTests.swift */,
+				76DCCC91DAC111452639C3A6 /* CallMapperTests.swift */,
 			);
 			path = ChatCallTests;
 			sourceTree = "<group>";
@@ -636,6 +642,7 @@
 				54059BF0818004FBC4B690C9 /* AppDependenciesTests.swift in Sources */,
 				CFA4B48569676D5893CBD47D /* LiveStackSmokeTests.swift in Sources */,
 				D1B16176A481E08D266AD42F /* VoIPClientTests.swift in Sources */,
+				0AA945321CA510EF6BD68680 /* CallMapperTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -705,6 +712,7 @@
 				2492F821BEF331F92B624E96 /* CentrifugoRealtime.swift in Sources */,
 				FA6268359A8249C98A562C4F /* CallWire.swift in Sources */,
 				E726518FDDD4CA2B3EC8C5DA /* VoIPClient.swift in Sources */,
+				E9E1185238A4F78B732ADB6E /* CallMapper.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -20,10 +20,17 @@ nonisolated struct CallSnapshot: Identifiable, Equatable, Sendable {
   let cameraEnabled: Bool
   let speakerEnabled: Bool
   let cameraPosition: CameraPosition
+  /// The server says the viewer may enter this call again: a group call they missed, declined or left
+  /// while the group is still running. Never true for a live or ended-for-everyone call.
+  var canJoin = false
+  /// The viewer's own id, so views do not assume the mock user.
+  var localUserID = MockSeed.currentUser.id
 }
 
 nonisolated enum CallEvent: Equatable, Sendable { case callUpdated(CallSnapshot) }
 nonisolated enum CallError: Error, Equatable, Sendable {
   case callNotFound, invalidTransition, callAlreadyInProgress, invalidConversation, userNotFound
   case capacityExceeded(maximum: Int)
+  /// The operation exists only for the mock (demo calls) or has no live mapping yet.
+  case unsupported
 }
