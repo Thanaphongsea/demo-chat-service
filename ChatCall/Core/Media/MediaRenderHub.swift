@@ -28,10 +28,18 @@ final class MediaRenderHub {
   }
 }
 
-/// Renders one `RTCVideoTrack` with Metal, detaching it when the view goes away.
+/// Renders one `RTCVideoTrack` with Metal and detaches the renderer when the view goes away, so a track
+/// never keeps feeding frames to views that no longer exist.
 struct VideoTrackView: UIViewRepresentable {
   let track: RTCVideoTrack
   var mirrored = false
+
+  final class Coordinator {
+    let track: RTCVideoTrack
+    init(track: RTCVideoTrack) { self.track = track }
+  }
+
+  func makeCoordinator() -> Coordinator { Coordinator(track: track) }
 
   func makeUIView(context: Context) -> RTCMTLVideoView {
     let view = RTCMTLVideoView()
@@ -43,5 +51,7 @@ struct VideoTrackView: UIViewRepresentable {
 
   func updateUIView(_ view: RTCMTLVideoView, context: Context) {}
 
-  static func dismantleUIView(_ view: RTCMTLVideoView, coordinator: ()) {}
+  static func dismantleUIView(_ view: RTCMTLVideoView, coordinator: Coordinator) {
+    coordinator.track.remove(view)
+  }
 }

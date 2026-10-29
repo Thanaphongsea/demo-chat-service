@@ -18,6 +18,7 @@ nonisolated final class WebRTCPeer: NSObject, MediaPeer, RTCPeerConnectionDelega
   private var capturer: RTCCameraVideoCapturer?
   private var position: AVCaptureDevice.Position = .front
   private var cameraWanted = true
+  private var isCapturing = false
   private let candidates: AsyncStream<IceCandidate>.Continuation
   let localCandidates: AsyncStream<IceCandidate>
 
@@ -69,7 +70,13 @@ nonisolated final class WebRTCPeer: NSObject, MediaPeer, RTCPeerConnectionDelega
       self.cameraWanted = cameraAllowed
     }
     await MainActor.run { MediaRenderHub.shared.setLocal(video) }
-    if cameraAllowed { try await startCapture(position: .front) }
+    if cameraAllowed {
+      do {
+        try await startCapture(position: .front)
+      } catch {
+        callLog.error("camera start failed: \(String(describing: error), privacy: .public)")
+      }
+    }
   }
 
   func createOffer() async throws -> SessionDescription {
@@ -105,16 +112,23 @@ nonisolated final class WebRTCPeer: NSObject, MediaPeer, RTCPeerConnectionDelega
   func setMicrophone(_ enabled: Bool) async { lock.withLock { audioTrack }?.isEnabled = enabled }
 
   func setCamera(_ enabled: Bool) async {
-    let video = lock.withLock { () -> RTCVideoTrack? in
+    let (video, capturing) = lock.withLock { () -> (RTCVideoTrack?, Bool) in
       cameraWanted = enabled
-      return videoTrack
+      return (videoTrack, isCapturing)
+    }
+    if CameraPlan.make(enabled: enabled, isCapturing: capturing).needsCapture {
+      guard await MediaPermissions.requestCamera() else {
+        callLog.error("camera permission denied")
+        return
+      }
+      do {
+        try await startCapture(position: lock.withLock { position })
+      } catch {
+        callLog.error("camera start failed: \(String(describing: error), privacy: .public)")
+        return
+      }
     }
     video?.isEnabled = enabled
-    if enabled {
-      try? await startCapture(position: lock.withLock { position })
-    } else {
-      await stopCapture()
-    }
   }
 
   func setSpeaker(_ enabled: Bool) async { AudioSessionController.setSpeaker(enabled) }
@@ -124,8 +138,12 @@ nonisolated final class WebRTCPeer: NSObject, MediaPeer, RTCPeerConnectionDelega
       position = position == .front ? .back : .front
       return position
     }
-    guard lock.withLock({ cameraWanted }) else { return }
-    try? await startCapture(position: next)
+    guard lock.withLock({ cameraWanted && isCapturing }) else { return }
+    do {
+      try await startCapture(position: next)
+    } catch {
+      callLog.error("camera flip failed: \(String(describing: error), privacy: .public)")
+    }
   }
 
   func close() async {
@@ -164,6 +182,7 @@ nonisolated final class WebRTCPeer: NSObject, MediaPeer, RTCPeerConnectionDelega
         if let error { continuation.resume(throwing: error) } else { continuation.resume() }
       }
     }
+    lock.withLock { isCapturing = true }
   }
 
   private func stopCapture() async {
@@ -171,6 +190,7 @@ nonisolated final class WebRTCPeer: NSObject, MediaPeer, RTCPeerConnectionDelega
     await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
       capturer.stopCapture { continuation.resume() }
     }
+    lock.withLock { isCapturing = false }
   }
 
   private static func distance(_ format: AVCaptureDevice.Format, from target: (Int32, Int32)) -> Int32 {

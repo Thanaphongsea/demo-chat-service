@@ -15,6 +15,7 @@
 		0E59E58511F2AE41E8389872 /* IntegrationQATests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0732DBE339E1775D1C64A839 /* IntegrationQATests.swift */; };
 		0EE6996647326FED4B27ECD9 /* AppDependencies.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0596FAD598EAC043BDA7DE1A /* AppDependencies.swift */; };
 		0F47EC77447B3BFFBABF6C21 /* StaticTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1FC3B24B67FC57F3D9A34F1 /* StaticTokens.swift */; };
+		101F68EC9ED7F6F4A6EF3412 /* CameraPlanTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07AA9FFDC034F10BA0D2420A /* CameraPlanTests.swift */; };
 		1221E5209C03FA4494C0C7D6 /* GatewayClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E93485A79872B9E415EDCF1 /* GatewayClient.swift */; };
 		157C8D0D514D3EE3FB99A66B /* FakeSystemCallAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64366C4951BD4FDC87C2C8A8 /* FakeSystemCallAdapter.swift */; };
 		163F0A287F4FCA0C1EF050CE /* ChatMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0B7E707AF66449E13DC0BE8 /* ChatMapper.swift */; };
@@ -117,6 +118,7 @@
 		E9E1185238A4F78B732ADB6E /* CallMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6ADA7DC558AFC8D9F711AE2 /* CallMapper.swift */; };
 		ED375ED68706874968D2934F /* ChatMapperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AAE22E8BF35572185E72A68 /* ChatMapperTests.swift */; };
 		F094FEDDD2192A20F09AB09D /* NewConversationStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB7B74466983C780CCC3AE3D /* NewConversationStoreTests.swift */; };
+		F202447EC2E870DEF2C09C83 /* CameraPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 293FAD14D4240D006D4E417D /* CameraPlan.swift */; };
 		F41CAD66A609AB507F8082B4 /* CallStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97BFCF43E6AAC6C036A245A0 /* CallStore.swift */; };
 		F75127D6EC0DFB4894C5F031 /* MessageBubble.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4155860E4BF27F2BE27019D1 /* MessageBubble.swift */; };
 		F77F457273CF5475C70E08BB /* ConversationListTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19CF33AF6626CA54D59DA730 /* ConversationListTests.swift */; };
@@ -150,6 +152,7 @@
 		0596FAD598EAC043BDA7DE1A /* AppDependencies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDependencies.swift; sourceTree = "<group>"; };
 		0732DBE339E1775D1C64A839 /* IntegrationQATests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntegrationQATests.swift; sourceTree = "<group>"; };
 		07710BDCD6E57F47172CEA2A /* LoginForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginForm.swift; sourceTree = "<group>"; };
+		07AA9FFDC034F10BA0D2420A /* CameraPlanTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CameraPlanTests.swift; sourceTree = "<group>"; };
 		09461235315EF9A69F59C10E /* MessageComposer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageComposer.swift; sourceTree = "<group>"; };
 		0C17912FF7D028622EAF2700 /* CallPreviews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallPreviews.swift; sourceTree = "<group>"; };
 		0F2956074A417F673081718A /* ConversationListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationListView.swift; sourceTree = "<group>"; };
@@ -170,6 +173,7 @@
 		225512E8E5C2DED5A33D4ED2 /* ChatRoomView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatRoomView.swift; sourceTree = "<group>"; };
 		231C771ABCCF691F154099E5 /* CallControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallControlsView.swift; sourceTree = "<group>"; };
 		26343FCE1C253FBE88908A07 /* AuthStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthStoreTests.swift; sourceTree = "<group>"; };
+		293FAD14D4240D006D4E417D /* CameraPlan.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CameraPlan.swift; sourceTree = "<group>"; };
 		2A060C13B3BD013A10651432 /* CentrifugoRealtime.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CentrifugoRealtime.swift; sourceTree = "<group>"; };
 		2A515220D15698E41ED04378 /* ChatRoomFixtures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatRoomFixtures.swift; sourceTree = "<group>"; };
 		2BB4DDC8CE659CD0D505F77D /* VideoCallFlowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoCallFlowTests.swift; sourceTree = "<group>"; };
@@ -312,6 +316,7 @@
 				E12FC0A5F9DF223635764C1F /* AudioSessionController.swift */,
 				B14657C1978E46E9F25BD729 /* MediaRenderHub.swift */,
 				5C9F4FD42D513AA3F31450CF /* WebRTCPeer.swift */,
+				293FAD14D4240D006D4E417D /* CameraPlan.swift */,
 			);
 			name = Media;
 			path = Media;
@@ -447,6 +452,7 @@
 				4AA127C3F4D408C2812F2C5E /* LiveCallMediaTests.swift */,
 				8DF4F705E1C3DE1701CB58BA /* SystemCallCoordinatorTests.swift */,
 				E59848EEED280667FA897195 /* LiveCallSmokeTests.swift */,
+				07AA9FFDC034F10BA0D2420A /* CameraPlanTests.swift */,
 			);
 			path = ChatCallTests;
 			sourceTree = "<group>";
@@ -748,6 +754,7 @@
 				157C8D0D514D3EE3FB99A66B /* FakeSystemCallAdapter.swift in Sources */,
 				41521B52A6091A5844E9A4D8 /* SystemCallCoordinatorTests.swift in Sources */,
 				AEC05B23D3139E9A14A100B6 /* LiveCallSmokeTests.swift in Sources */,
+				101F68EC9ED7F6F4A6EF3412 /* CameraPlanTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -829,6 +836,7 @@
 				93EAB5A0CD40CB2BAC77E577 /* CallKitAdapter.swift in Sources */,
 				B04D93B2C4A41C43B402D5CC /* PushKitAdapter.swift in Sources */,
 				85C33A2D84331A4F37289072 /* UnconfiguredCallClient.swift in Sources */,
+				F202447EC2E870DEF2C09C83 /* CameraPlan.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
