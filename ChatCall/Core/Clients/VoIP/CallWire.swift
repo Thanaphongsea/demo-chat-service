@@ -78,3 +78,49 @@ nonisolated enum WireDate {
     return plain.date(from: text) ?? fractional.date(from: text)
   }
 }
+
+/// One STUN/TURN server from `GET /api/ice`. The credential is a secret and never printed.
+nonisolated struct WireICEServer: Decodable, Sendable, Equatable, CustomStringConvertible,
+  CustomDebugStringConvertible
+{
+  let urls: [String]
+  let username: String?
+  let credential: String?
+
+  private enum CodingKeys: String, CodingKey { case urls, username, credential }
+
+  init(urls: [String], username: String? = nil, credential: String? = nil) {
+    self.urls = urls
+    self.username = username
+    self.credential = credential
+  }
+
+  init(from decoder: any Decoder) throws {
+    let values = try decoder.container(keyedBy: CodingKeys.self)
+    if let many = try? values.decode([String].self, forKey: .urls) {
+      urls = many
+    } else {
+      urls = [try values.decode(String.self, forKey: .urls)]
+    }
+    username = try values.decodeIfPresent(String.self, forKey: .username)
+    credential = try values.decodeIfPresent(String.self, forKey: .credential)
+  }
+
+  var description: String { "ICEServer(urls: \(urls), credential: <redacted>)" }
+  var debugDescription: String { description }
+}
+
+nonisolated struct WireICEConfig: Decodable, Sendable, Equatable {
+  let servers: [WireICEServer]
+  private enum CodingKeys: String, CodingKey { case servers = "iceServers" }
+}
+
+nonisolated struct PrepareRoomRequest: Encodable, Sendable {
+  let roomID: String
+  private enum CodingKeys: String, CodingKey { case roomID = "room_id" }
+}
+
+nonisolated struct WireRoom: Decodable, Sendable, Equatable {
+  let roomID: String
+  private enum CodingKeys: String, CodingKey { case roomID = "room_id" }
+}

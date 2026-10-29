@@ -192,7 +192,43 @@ nonisolated struct VoIPClientTests {
     defaults.set("https://voip.example.test", forKey: "voipURL")
     #expect(VoIPConfiguration(defaults: defaults)?.baseURL.absoluteString == "https://voip.example.test")
   }
+
+  @Test("Prepare room posts the logical room id with the call id as a query")
+  func prepareRoom() async throws {
+    let (client, transport) = client { _ in StubReply(201, Data(#"{"room_id":"internal-1"}"#.utf8)) }
+    try await client.prepareRoom(callID: "call-1", roomID: "grp_demo")
+    let request = try #require(transport.requests.first)
+    #expect(request.url?.absoluteString == "https://voip.example.test/api/rooms?call_id=call-1")
+    #expect(request.httpMethod == "POST")
+    #expect(body(request)["room_id"] as? String == "grp_demo")
+  }
+
+  @Test("ICE servers accept one url or many, and never print the credential")
+  func iceServers() async throws {
+    let json = """
+      {"iceServers":[{"urls":"stun:stun.example.test:3478"},
+       {"urls":["turn:turn.example.test:3478?transport=udp","turns:turn.example.test:443"],
+        "username":"u","credential":"s3cret","credentialType":"password"}]}
+      """
+    let (client, transport) = client { _ in StubReply(200, Data(json.utf8)) }
+    let servers = try await client.iceServers()
+    #expect(transport.requests.first?.url?.path == "/api/ice")
+    #expect(servers.map(\.urls.count) == [1, 2])
+    #expect(servers[1].username == "u" && servers[1].credential == "s3cret")
+    #expect(!String(describing: servers[1]).contains("s3cret"))
+    #expect(!String(reflecting: servers[1]).contains("s3cret"))
+  }
+
+  @Test("The media socket URL carries room, peer and call but never the token")
+  func mediaSocket() async throws {
+    let (client, _) = client { _ in StubReply(200) }
+    let socket = try await client.mediaSocket(roomID: "grp_demo", callID: "call-1", peer: Self.me)
+    #expect(socket.url.absoluteString == "wss://voip.example.test/api/ws?room_id=grp_demo&peer_id=alice&call_id=call-1")
+    #expect(socket.token == "T")
+    #expect(!socket.url.absoluteString.contains("T&") && !socket.url.absoluteString.contains("token"))
+  }
 }
+
 
 private actor Sleeps {
   private(set) var values: [Duration] = []

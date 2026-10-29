@@ -78,6 +78,36 @@ actor VoIPClient {
       method: "POST", path: ["api", "calls", id, action.rawValue], query: [], body: body)
   }
 
+  /// Opens the media room for an accepted call. The answer's id is internal; keep using the logical room id.
+  func prepareRoom(callID: String, roomID: String) async throws {
+    let body = try JSONEncoder().encode(PrepareRoomRequest(roomID: roomID))
+    let _: WireRoom = try await send(
+      method: "POST", path: ["api", "rooms"], query: [URLQueryItem(name: "call_id", value: callID)],
+      body: body)
+  }
+
+  func iceServers() async throws -> [WireICEServer] {
+    let config: WireICEConfig = try await send(method: "GET", path: ["api", "ice"], query: [])
+    return config.servers
+  }
+
+  /// The media socket URL and a current token for its `Authorization` header (never put in the URL).
+  func mediaSocket(roomID: String, callID: String, peer: UserID) async throws -> (
+    url: URL, token: String
+  ) {
+    let token = try await validToken()
+    var parts = URLComponents(
+      url: configuration.baseURL.appending(path: "api").appending(path: "ws"),
+      resolvingAgainstBaseURL: false)
+    parts?.scheme = configuration.baseURL.scheme == "https" ? "wss" : "ws"
+    parts?.queryItems = [
+      URLQueryItem(name: "room_id", value: roomID), URLQueryItem(name: "peer_id", value: peer.rawValue),
+      URLQueryItem(name: "call_id", value: callID)
+    ]
+    guard let url = parts?.url else { throw VoIPError.invalidResponse }
+    return (url, token.value)
+  }
+
   // MARK: transport
 
   private func send<Response: Decodable & Sendable>(
