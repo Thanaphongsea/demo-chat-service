@@ -63,9 +63,14 @@ struct DomainFixtureTests {
     }
     #expect(throws: ChatError.invalidMembers) {
       try Conversation(
-        id: ConversationID("invalid"), kind: .group, name: "Team",
-        memberIDs: [selfID, UserID("user-ava")], updatedAt: MockSeed.date)
+        id: ConversationID("invalid"), kind: .group, name: "Team", memberIDs: [],
+        updatedAt: MockSeed.date)
     }
+    // Real groups can be small; only creating one requires two other people.
+    #expect(
+      (try? Conversation(
+        id: ConversationID("small"), kind: .group, name: "Team",
+        memberIDs: [selfID, UserID("user-ava")], updatedAt: MockSeed.date)) != nil)
     #expect(throws: ChatError.groupNameRequired) {
       try Conversation(
         id: ConversationID("invalid"), kind: .group, name: "  ",

@@ -29,7 +29,7 @@ nonisolated struct Conversation: Identifiable, Equatable, Sendable {
     unreadCount: Int = 0, lastMessage: Message? = nil, updatedAt: Date
   ) throws {
     guard Set(memberIDs).count == memberIDs.count,
-      kind == .direct ? memberIDs.count == 2 : memberIDs.count >= 3
+      kind == .direct ? memberIDs.count == 2 : !memberIDs.isEmpty
     else { throw ChatError.invalidMembers }
     let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
     guard kind != .group || !trimmedName.isEmpty else { throw ChatError.groupNameRequired }
