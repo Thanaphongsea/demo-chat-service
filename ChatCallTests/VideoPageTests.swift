@@ -3,6 +3,20 @@ import Testing
 @testable import ChatCall
 
 struct VideoPageTests {
+  // Losing the terminal outcome makes completed calls look like uncompleted attempts.
+  @Test("Ended history retains its outcome for incoming and outgoing calls")
+  func endedHistoryOutcome() {
+    for direction in [CallDirection.incoming, .outgoing] {
+      let call = CallSnapshot(
+        id: CallID("finished"), conversationID: ConversationID("conversation-ava"),
+        kind: .direct, direction: direction, state: .ended,
+        participants: Array(MockSeed.standard.users.prefix(2)), startedAt: MockSeed.date,
+        microphoneEnabled: true, cameraEnabled: true, speakerEnabled: true,
+        cameraPosition: .front)
+      #expect(call.historyStatus == "Ended")
+    }
+  }
+
   // Dropping the local tile or slicing by four remotes breaks every page.
   @Test("Every page keeps local plus at most three remote people, including audio-only tiles")
   func pages() {

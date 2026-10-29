@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		0073CA33429060F054698C40 /* AuthenticatedShellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 769AA539D43E42EA80B3BC5A /* AuthenticatedShellView.swift */; };
 		0A11AA7B18A0504BEFCBF961 /* DateSeparator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60CA0C4A65975950FFCA4273 /* DateSeparator.swift */; };
+		0E59E58511F2AE41E8389872 /* IntegrationQATests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0732DBE339E1775D1C64A839 /* IntegrationQATests.swift */; };
 		0EE6996647326FED4B27ECD9 /* AppDependencies.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0596FAD598EAC043BDA7DE1A /* AppDependencies.swift */; };
 		1A51CF31A9F72248EF0BB20D /* MessagingFlowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7C4A736AC9F94DF53DAD412 /* MessagingFlowTests.swift */; };
 		1D2D1EC7492FF03707D68D39 /* DemoScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC3C5209370B7E36628DD9E3 /* DemoScheduler.swift */; };
@@ -93,6 +94,7 @@
 
 /* Begin PBXFileReference section */
 		0596FAD598EAC043BDA7DE1A /* AppDependencies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDependencies.swift; sourceTree = "<group>"; };
+		0732DBE339E1775D1C64A839 /* IntegrationQATests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntegrationQATests.swift; sourceTree = "<group>"; };
 		07710BDCD6E57F47172CEA2A /* LoginForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginForm.swift; sourceTree = "<group>"; };
 		09461235315EF9A69F59C10E /* MessageComposer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageComposer.swift; sourceTree = "<group>"; };
 		0F2956074A417F673081718A /* ConversationListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationListView.swift; sourceTree = "<group>"; };
@@ -317,6 +319,7 @@
 			isa = PBXGroup;
 			children = (
 				19CF33AF6626CA54D59DA730 /* ConversationListTests.swift */,
+				0732DBE339E1775D1C64A839 /* IntegrationQATests.swift */,
 				B12B204AEC18981234362273 /* LaunchTests.swift */,
 				30A6D340F34D68EC3BE67E05 /* LoginFlowTests.swift */,
 				F7C4A736AC9F94DF53DAD412 /* MessagingFlowTests.swift */,
@@ -474,6 +477,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F77F457273CF5475C70E08BB /* ConversationListTests.swift in Sources */,
+				0E59E58511F2AE41E8389872 /* IntegrationQATests.swift in Sources */,
 				7B51EB4B0B6F424296963019 /* LaunchTests.swift in Sources */,
 				6BA8038618DEE35E0145C7AD /* LoginFlowTests.swift in Sources */,
 				1A51CF31A9F72248EF0BB20D /* MessagingFlowTests.swift in Sources */,

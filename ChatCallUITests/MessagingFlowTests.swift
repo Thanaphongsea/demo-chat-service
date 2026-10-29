@@ -2,6 +2,15 @@ import XCTest
 
 nonisolated final class MessagingFlowTests: XCTestCase {
   @MainActor
+  func testIncomingGroupMessageIdentifiesItsSender() {
+    let app = signedIn()
+    app.buttons["conversations.room.conversation-team"].tap()
+    XCTAssertTrue(app.staticTexts["See you on the call."].waitForExistence(timeout: 5))
+    XCTAssertTrue(app.staticTexts["Noah Williams"].exists, app.debugDescription)
+    XCTAssertFalse(app.staticTexts["Group member"].exists)
+  }
+
+  @MainActor
   func testDirectSendDeliveryAndUpdatedPreview() {
     let app = signedIn()
     app.buttons["conversations.room.conversation-ava"].tap()

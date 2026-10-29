@@ -29,6 +29,7 @@ extension CallSnapshot {
     switch state {
     case .missed: "Missed"
     case .declined: "Declined"
+    case .ended: "Ended"
     default: direction == .incoming ? "Incoming" : "Outgoing"
     }
   }

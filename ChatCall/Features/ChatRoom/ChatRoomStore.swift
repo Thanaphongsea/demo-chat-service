@@ -24,13 +24,14 @@ final class ChatRoomStore {
   var draft = ""
   private(set) var state: State = .loading
   private var messages: [RoomMessage] = []
+  private var users: [User] = []
   let conversationID: ConversationID
   let currentUserID: UserID
   @ObservationIgnored private let client: any ChatClient
   @ObservationIgnored private let calendar: Calendar
   @ObservationIgnored private let now: () -> Date
   @ObservationIgnored private var revision = 0
-  @ObservationIgnored private var loadTask: Task<[Message], any Error>?
+  @ObservationIgnored private var loadTask: Task<([Message], [User]), any Error>?
   @ObservationIgnored private var eventsTask: Task<Void, Never>?
   @ObservationIgnored private var sendTasks: [MessageID: Task<Void, Never>] = [:]
   @ObservationIgnored private var deferredInserts: [MessageID: Message] = [:]
@@ -54,6 +55,10 @@ final class ChatRoomStore {
       && !draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
   }
 
+  func senderName(for id: UserID) -> String {
+    users.first { $0.id == id }?.displayName ?? "Unknown member"
+  }
+
   init(
     conversationID: ConversationID, currentUserID: UserID, client: any ChatClient,
     calendar: Calendar = .current, now: @escaping () -> Date = { Date() }
@@ -69,13 +74,18 @@ final class ChatRoomStore {
     guard loadTask == nil, !Task.isCancelled else { return }
     let attempt = revision
     state = .loading
-    let operation = Task { try await client.messages(in: conversationID) }
+    let operation = Task {
+      async let messages = client.messages(in: conversationID)
+      let users = (try? await client.listUsers()) ?? []
+      return try await (messages, users)
+    }
     loadTask = operation
     await withTaskCancellationHandler {
       do {
-        let snapshot = try await operation.value
+        let (snapshot, users) = try await operation.value
         try Task.checkCancellation()
         guard attempt == revision else { return }
+        self.users = users
         for message in snapshot { insert(message) }
         updateState()
       } catch {
@@ -134,6 +144,7 @@ final class ChatRoomStore {
     deferredInserts = [:]
     deliveries = [:]
     messages = []
+    users = []
     draft = ""
     state = .loading
   }

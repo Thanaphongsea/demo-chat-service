@@ -20,4 +20,4 @@ format-check:
 	xcrun swift-format lint --strict --recursive $(SWIFT_PATHS)
 
 lint:
-	swiftlint lint --strict $(SWIFT_PATHS)
+	swiftlint --strict

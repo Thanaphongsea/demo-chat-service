@@ -71,7 +71,7 @@ struct ChatRoomView: View {
               ForEach(section.messages) { row in
                 MessageBubble(
                   row: row, isOutgoing: row.message.senderID == store.currentUserID,
-                  senderName: kind == .group ? "Group member" : title,
+                  senderName: kind == .group ? store.senderName(for: row.message.senderID) : title,
                   showsSender: kind == .group, retry: { store.retry(row.id) }
                 )
                 .id(row.id)
