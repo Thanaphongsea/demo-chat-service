@@ -57,7 +57,6 @@ nonisolated struct AppDependencies: Sendable {
     voip: VoIPConfiguration? = VoIPConfiguration(), useSystemCalls: Bool = true,
     arguments: [String] = ProcessInfo.processInfo.arguments
   ) -> AppDependencies {
-    let mocked = mock(arguments: arguments)
     let auth = LiveAuthClient(configuration: configuration)
     let signal = SessionEndedSignal()
     let chat = LiveChatClient(
@@ -71,7 +70,7 @@ nonisolated struct AppDependencies: Sendable {
       })
     guard let voip else {
       return AppDependencies(
-        auth: auth, chat: chat, calls: mocked.calls, sessionEnded: signal,
+        auth: auth, chat: chat, calls: UnconfiguredCallClient(), sessionEnded: signal,
         stopBackgroundWork: { await chat.stopRealtime() })
     }
     let systemCalls: (any SystemCallAdapter)? = useSystemCalls ? CallKitAdapter() : nil

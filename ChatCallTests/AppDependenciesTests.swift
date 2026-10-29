@@ -12,7 +12,7 @@ struct AppDependenciesTests {
       voip: nil, arguments: [])
     #expect(live.auth is LiveAuthClient)
     #expect(live.chat is LiveChatClient)
-    #expect(live.calls is MockCallClient)
+    #expect(live.calls is UnconfiguredCallClient)
     #expect(live.demoCalls)
     let withVoIP = AppDependencies.live(
       configuration: .dev, gateway: GatewayConfiguration(httpBase: URL(string: "https://gw.test")!),
@@ -54,5 +54,42 @@ struct AppDependenciesTests {
     var secondIterator = second.makeAsyncIterator()
     #expect(await firstIterator.next() != nil)
     #expect(await secondIterator.next() != nil)
+  }
+}
+
+@MainActor
+struct CallErrorMessageTests {
+  @Test("Each failure is explained to the user without leaking ids or server text")
+  func messages() {
+    func text(_ error: Error) -> String { CallStore.message(for: error) }
+    #expect(text(CallError.notConfigured).contains("-voipURL"))
+    #expect(text(CallError.capacityExceeded(maximum: 16)).contains("16"))
+    #expect(text(CallError.callAlreadyInProgress) == "You're already in a call.")
+    #expect(text(CallError.invalidConversation) == "This conversation can't be called.")
+    #expect(text(VoIPError.transport).hasPrefix("Can't reach the call service"))
+    #expect(text(VoIPError.server(503)).hasPrefix("Can't reach the call service"))
+    #expect(text(VoIPError.forbidden).hasPrefix("You can't make this call"))
+    #expect(text(VoIPError.conflict(call: nil, message: "secret detail")) == "Unable to update the call. Please try again.")
+  }
+
+  @Test("Without a VoIP URL a real conversation cannot be called, and the store says why")
+  func unconfiguredStart() async throws {
+    let conversation = try #require(try await MockChatClient().listConversations().first)
+    await #expect(throws: CallError.notConfigured) {
+      try await UnconfiguredCallClient().startVideoCall(in: conversation)
+    }
+    let store = CallStore(client: UnconfiguredCallClient(), chatClient: MockChatClient())
+    await store.startVideo(in: conversation.id)
+    #expect(store.errorMessage?.contains("-voipURL") == true)
+    #expect(store.call == nil)
+    store.reset()
+  }
+
+  @Test("The demo actions keep working without a VoIP URL")
+  func demoStillWorks() async throws {
+    let store = CallStore(client: UnconfiguredCallClient(), chatClient: MockChatClient())
+    await store.incoming(kind: .direct)
+    #expect(store.call?.state == .incoming)
+    store.reset()
   }
 }

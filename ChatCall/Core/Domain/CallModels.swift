@@ -33,4 +33,6 @@ nonisolated enum CallError: Error, Equatable, Sendable {
   case capacityExceeded(maximum: Int)
   /// The operation exists only for the mock (demo calls) or has no live mapping yet.
   case unsupported
+  /// Calls are not connected to a call service in this build or launch (no VoIP URL).
+  case notConfigured
 }

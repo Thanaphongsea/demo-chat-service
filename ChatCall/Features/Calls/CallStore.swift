@@ -1,4 +1,5 @@
 import Observation
+import OSLog
 
 @MainActor
 @Observable
@@ -252,10 +253,26 @@ final class CallStore {
       receive(.callUpdated(snapshot))
     } catch {
       guard attempt == revision, !(error is CancellationError), !Task.isCancelled else { return }
-      errorMessage =
-        (error as? CallError) == .capacityExceeded(maximum: 16)
-        ? "Video calls support up to 16 people, including you."
-        : "Unable to update the call. Please try again."
+      callLog.error("call operation failed: \(String(describing: error), privacy: .public)")
+      errorMessage = Self.message(for: error)
+    }
+  }
+
+  /// What the user is told; never includes ids, tokens or server text.
+  static func message(for error: Error) -> String {
+    switch error {
+    case CallError.capacityExceeded: "Video calls support up to 16 people, including you."
+    case CallError.notConfigured:
+      "Calls aren't connected to a call service yet. Set the VoIP URL (-voipURL) to enable them."
+    case CallError.callAlreadyInProgress: "You're already in a call."
+    case CallError.invalidConversation: "This conversation can't be called."
+    case CallError.callNotFound, CallError.invalidTransition:
+      "This call is no longer available."
+    case VoIPError.transport, VoIPError.server, VoIPError.rateLimited:
+      "Can't reach the call service. Check your connection and try again."
+    case VoIPError.unauthorized, VoIPError.revoked, VoIPError.forbidden:
+      "You can't make this call with this account."
+    default: "Unable to update the call. Please try again."
     }
   }
 
