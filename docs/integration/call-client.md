@@ -27,6 +27,22 @@ The handoff is the future source for HTTP actions, authenticated native WebSocke
 | `demoReconnect(callID:)` | Active → reconnecting → active via scheduler. | Demo-only trigger. Future recovery closes old transport, guards callbacks by generation, checks personal accepted state and bounds retries per handoff. It must not silently auto-join a participant who has left. |
 | `events()` | Independent `AsyncStream<CallEvent>` observers receive full snapshots. | Convert polling/signaling/system events into serialized snapshots; terminate subscribers independently. Supply resync/reconnect/error semantics because this stream cannot throw or encode transport errors. |
 
+## Live adapter, phase 2A (signalling only)
+
+`LiveCallClient` talks to the VoIP REST API (`-voipURL`, no default) when that launch argument is set; otherwise the app keeps `MockCallClient` and its demo actions. It is unit-tested against scripted responses built from the handoff contract and has **not** been run against a real VoIP service: the dev tunnel returns 404 for `/api/*` and nothing listens on `localhost:8080`.
+
+| Product action | Wire call |
+|---|---|
+| Start direct / group | `POST /api/calls` with `callee_id` / `callee_ids` (1–15), `Idempotency-Key` header and `idempotency_key` body; a retry after a timeout reuses the first key |
+| Answer / Decline | `accept` / `reject` |
+| End | direct ringing caller `cancel`, direct accepted `end`, group `leave` |
+| End for everyone | group creator only: `end-all` |
+| Join / Rejoin | `join`, offered only when the server says `can_join` and the group is still running |
+| Incoming and joinable calls | `GET /api/calls?peer_id=` every 1 s while idle |
+| Lease | `heartbeat` every 10 s while joined (direct ringing calls are only read) |
+
+The personal `status`, shared `group_status` and `can_join` are mapped by `CallMapper` into `CallSnapshot` (`canJoin`, `localUserID`). A creator who leaves a group others still occupy is `.ended` for them but can rejoin. Transient poll failures never end a call; 404/403 end it locally; 401 returns the app to Login. Local microphone, camera, speaker and flip toggles change the snapshot only. **Not built yet:** ICE, `/api/rooms`, the media WebSocket, WebRTC (phase 2B), CallKit/PushKit/APNs (2C), a persistent history API, and a call-time roster refresh beyond the store's existing conversation refresh.
+
 ## Cancellation, ordering and idempotency
 
 The store subscribes before operations/current snapshot/history fetch, deduplicates history by call ID, serializes controls while busy, rejects stale state regressions, and retires dismissed/previous IDs. Terminal calls cannot reopen from delayed active events. Duplicate identical snapshots are safe. A new live call must not replace another live call.
@@ -37,13 +53,13 @@ The mock's immediate actor mutations are not network idempotency guarantees. The
 
 ## Mapping checklist before replacing the mock
 
-- [ ] Map separate personal `status`, shared `group_status`, participant status and `can_join` (missing means false). Add discovery/Join/Rejoin and creator end-all as explicit domain/UI work; do not overload `.ended`.
+- [x] Map separate personal `status`, shared `group_status`, participant status and `can_join` (missing means false); Join/Rejoin and creator end-all exist in domain, store and views.
 - [ ] Supply identity/token refresh and authorized user/device/session mappings; remove mock `user-me` assumptions. Never put JWT in URLs/logs.
 - [ ] Resolve complete roster freshness and >16/missing-member errors; preserve one-tap call-all behavior.
-- [ ] Implement bounded create retry with fixed idempotency key/payload; verify busy/conflict/reconcile cases.
+- [x] Bounded create retry with fixed idempotency key/payload; busy/conflict mapped (unit-tested; not yet run against a real service).
 - [ ] Implement accepted-only media: room preparation, dynamic ICE, authenticated native socket, serialized SDP/server offers, pre-description ICE queue and track mapping from SDP mid/msid.
 - [ ] Send video subscriptions for each page/roster/reconnect: local plus three stable remote slots, audio for everyone, audio-only members retain slots. Hiding tiles alone is insufficient.
-- [ ] Implement separate polling and heartbeat duties (reference heartbeat 10 seconds, lease 45 seconds); test lifecycle suspension on physical iPhone.
+- [x] Separate polling and heartbeat duties implemented and unit-tested; lifecycle suspension on a physical iPhone still to be tested.
 - [ ] Add generation-guarded recovery, teardown, permissions/audio routing/interruption, pinned WebRTC build and iPhone↔Web↔Kotlin interoperability tests from the acceptance checklist.
 - [ ] Design APNs VoIP registry/sender, token rotation/environment/topic and CallKit/PushKit integration with backend. The supplied backend currently has FCM registration/sending only; a PushKit token must never be sent to that FCM endpoint.
 - [ ] Supply persistent history/error contracts and select production bundle/team/capabilities; no Apple signing material belongs in this repository.

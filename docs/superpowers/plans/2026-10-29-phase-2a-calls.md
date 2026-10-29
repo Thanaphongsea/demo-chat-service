@@ -1,5 +1,7 @@
 # Phase 2A: Live call signalling (no media) Implementation Plan
 
+> **Status (2026-10-29):** Tasks 1–6 implemented and unit-tested (200 tests). Not verified live: no reachable VoIP origin yet.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans. Steps use checkbox (`- [ ]`) syntax.
 
 **Goal:** Replace `MockCallClient` with a `LiveCallClient` that creates, answers, declines, joins, leaves and ends calls through the VoIP REST API, discovers incoming and joinable calls by polling, and keeps its lease alive with heartbeats. No audio/video yet (Phase 2B).
