@@ -16,14 +16,16 @@ There is no auth event stream, refresh method, or token provider in this protoco
 
 It is the default. `AuthConfiguration.dev` holds the dev URL and app id (the quick-tunnel URL changes on restart); override with `-authBaseURL`/`-authAppID`. `-demo-mock` or `-demo-immediateEvents` (all UI tests) selects the full mock. Chat and calls remain mocked, so the mock `user-me` identity still applies to them.
 
-Still open: refresh/revocation endpoints (sign-out is local only), startup session restoration in `AuthStore`, and a token provider for the call adapter.
+Since the live chat work: sign-in also sends a stable per-install `device_id` (the server signs it into the token's `dev` claim, and a token without one cannot register a push device). `LiveAuthClient` is an `AccessTokenProvider`: `validToken()` refreshes through `POST /v1/token/refresh` (old token as bearer) once the token is within 60 seconds of expiry, sharing a single in-flight refresh between callers. A refresh 401 whose body carries code 70009 (`ErrorCode` or `code`) is `AuthError.revoked`; any other 401 ends the session; 5xx keeps it and reports `.unavailable`.
+
+Still open: a server-side logout/revocation endpoint (sign-out is local only), startup session restoration in `AuthStore`, and the call adapter's use of the token provider.
 
 ## Mock replacement checklist
 
 - [ ] Supply identity service login, refresh, logout/revocation, expiry, error, and session-restoration contracts. No Login endpoint or wire shape has been supplied.
 - [ ] Supply reachable environment URLs, test accounts, issuer/audience/app and user/device/session identity mappings through the team's configuration channel.
 - [ ] Define secure token storage, refresh serialization, cancellation, logout/offline behavior, and account-switch cleanup.
-- [ ] Add a token provider below the UI boundary for the call adapter; the VoIP handoff consumes an existing identity JWT and does not provide login/refresh.
+- [x] Token provider below the UI boundary (`AccessTokenProvider`, used by the chat gateway and realtime socket). The call adapter will reuse it; the VoIP handoff consumes an existing identity JWT and does not provide login/refresh.
 - [ ] Replace mock `user-me` identity assumptions in composition/domain consumers with the authenticated user when implementing live integration.
 - [ ] Exercise invalid credentials, offline/expiry, cancellation, concurrent sign-in/sign-out, and relaunch on the real adapter before enabling restoration.
 

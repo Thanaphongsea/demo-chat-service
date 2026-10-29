@@ -1,6 +1,21 @@
 # ChatClient integration contract
 
-`Core/Clients/ChatClient.swift` returns domain values, not transport DTOs. Replace the shared `chat` dependency in `AppDependencies` so list, compose, room, and call roster reads share the same source. No live chat endpoint, SDK, event envelope, pagination, or JSON contract has been supplied. `Codable` on a domain type is not a wire-contract decision.
+`Core/Clients/ChatClient.swift` returns domain values, not transport DTOs. Replace the shared `chat` dependency in `AppDependencies` so list, compose, room, and call roster reads share the same source. `LiveChatClient` now implements this protocol against the Jasmine gateway (REST `/v4/<operation>` plus the Centrifugo socket); the mapping below is taken from the reference web app (`chat-service-dev-webapp/webapp/lib`). It is unit-tested against scripted responses only and has **not** yet been exercised against the dev stack. `Codable` on a domain type is not a wire-contract decision.
+
+## Live adapter (as built)
+
+| Member | Wire mapping | Known limits |
+|---|---|---|
+| `listConversations()` | `recentcontact/get_list` (pinned and normal cursors until `CompleteFlag == 3`, page cap 20); each group's roster from `group_open_http_svc/get_group_member_info` (100 per page) | A short or failed roster page fails the whole list; one request set per group on every refresh. |
+| `listUsers()` | No directory endpoint exists. Built from direct peers and group members, names from `profile/portrait_get` | The composer only offers people already related to you. Needs a backend directory API to start a chat with someone new. |
+| `messages(in:)` | `openim/admin_getroammsg` (1:1, `MaxCnt` 20) / `group_open_http_svc/group_msg_get_simple` (`ReqMsgNumber` 20) | One page only (latest 20); no scroll-back. Older history needs a cursor in the protocol. |
+| `send(text:to:)` | `openim/sendmsg` / `group_open_http_svc/send_group_msg` (group nonce field is `Random`) | Fresh nonce per call, no client retry: a lost response after the server accepted the message can duplicate it. Needs a client request id in the contract. Text only. |
+| `createDirect(with:)` | None: a direct conversation exists after the first message | Name is the user id until the next list refresh. |
+| `createGroup(name:members:)` | `group_open_http_svc/create_group` (`Type: Public`, at most 50 listed members) | Needs two other members. |
+| `events()` | Centrifugo, server-side channel `user:<me>`: `onRecvNewMessage`, `onNewConversation`/`onConversationChanged`, `onRecvC2CReadReceipt`, `onKickedOffline` | `delivered` means the peer read a 1:1 message; group messages stay `sent`. A reconnect re-reads the conversation list but does not backfill an open room's messages. Other events are ignored. |
+
+Behaviours worth knowing: non-text message bodies (images, E2EE `TIMCustomElem`) show as "[Unsupported message]"; recalled messages show "Message was recalled"; every `/v4` answer is checked for a non-zero `ErrorCode` even on HTTP 200; a revoked (70009) or unauthorised answer ends the session and returns the app to Login. Launch override: `-gatewayURL`.
+
 
 All throwing operations must cancel their underlying work and report cancellation distinctly from a service failure. Before committing a mutation, check task cancellation where the transport allows it. Cancellation after server acceptance cannot undo a message or group: the adapter needs reconciliation and idempotency from the backend contract. Stores discard stale completions by revision. Cancelling a view subscription must remove that observer without stopping other consumers of the shared client.
 
@@ -18,8 +33,8 @@ The mock publishes insert and conversation-preview updates before `send` returns
 
 ## Mock replacement checklist
 
-- [ ] Supply official chat gateway/SDK/API docs, authentication, authorized user/conversation ID mapping, errors, and test accounts.
-- [ ] Map every method and event above, including complete roster pagination for group calling.
+- [ ] Supply official chat gateway docs and **test accounts**; the current mapping comes from the reference web app. (Authentication is mapped: same JWT as VoIP.)
+- [x] Map every method and event above, including complete roster pagination for group calling (see *Live adapter*).
 - [ ] Agree snapshot/subscription cursor, reconnect/replay, deduplication, idempotency, ambiguous-send retry and read/unread policies.
 - [ ] Resolve historical sender names independently of selectable-user availability; define a fallback and directory failure policy.
 - [ ] Preserve shared dependency ownership and cancellation; test snapshot/event races, duplicate deliveries, identical concurrent sends, logout and account switching with the adapter.
