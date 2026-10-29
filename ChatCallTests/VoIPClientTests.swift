@@ -181,16 +181,16 @@ nonisolated struct VoIPClientTests {
     await #expect(throws: CancellationError.self) { try await cancelled.inbox(peer: Self.me) }
   }
 
-  @Test("Configuration exists only for an http(s) voipURL")
+  @Test("Configuration defaults to dev and accepts valid launch overrides only")
   func configuration() throws {
     let suite = "VoIPClientTests.config"
     let defaults = try #require(UserDefaults(suiteName: suite))
     defer { defaults.removePersistentDomain(forName: suite) }
-    #expect(VoIPConfiguration(defaults: defaults) == nil)
+    #expect(VoIPConfiguration(defaults: defaults) == .dev)
     defaults.set("ftp://x", forKey: "voipURL")
-    #expect(VoIPConfiguration(defaults: defaults) == nil)
+    #expect(VoIPConfiguration(defaults: defaults) == .dev)
     defaults.set("https://voip.example.test", forKey: "voipURL")
-    #expect(VoIPConfiguration(defaults: defaults)?.baseURL.absoluteString == "https://voip.example.test")
+    #expect(VoIPConfiguration(defaults: defaults).baseURL.absoluteString == "https://voip.example.test")
   }
 
   @Test("Prepare room posts the logical room id with the call id as a query")

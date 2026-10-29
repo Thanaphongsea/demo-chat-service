@@ -49,4 +49,33 @@ nonisolated struct LiveCallSmokeTests {
     #expect(ended.state == .ended)
     #expect(await waitFor(bob, .ended))
   }
+
+  @Test("Group: Alice rings the group, Bob declines then rejoins, Alice ends it for everyone")
+  func groupCall() async throws {
+    let (alice, aliceUser) = try await client("u_alice")
+    let (bob, bobUser) = try await client("u_bob")
+    let conversation = try Conversation(
+      id: ConversationID("group_g_test"), kind: .group, name: "g_test",
+      memberIDs: [aliceUser.id, bobUser.id, UserID("u_eve")], updatedAt: .now)
+    let started = try await alice.startVideoCall(in: conversation)
+    print("CALLSMOKE group started:", started.id.rawValue, started.state, started.kind)
+    #expect(started.kind == .group)
+    #expect(await waitFor(bob, .incoming))
+    let declined = try await bob.decline(callID: started.id)
+    print("CALLSMOKE group declined:", declined.state, "canJoin=\(declined.canJoin)")
+    #expect(declined.state == .declined)
+    #expect(declined.canJoin)
+    #expect(await bob.history().contains { $0.id == started.id && $0.canJoin })
+    let rejoined = try await bob.join(callID: started.id)
+    print("CALLSMOKE group rejoined:", rejoined.state)
+    #expect(rejoined.state == .active)
+    #expect(await waitFor(alice, .active))
+    let left = try await bob.end(callID: started.id)
+    print("CALLSMOKE group bob left:", left.state, "canJoin=\(left.canJoin)")
+    #expect(left.state == .ended)
+    let ended = try await alice.endForEveryone(callID: started.id)
+    print("CALLSMOKE group ended for everyone:", ended.state, "canJoin=\(ended.canJoin)")
+    #expect(ended.state == .ended)
+    #expect(!ended.canJoin)
+  }
 }

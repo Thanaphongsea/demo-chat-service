@@ -50,8 +50,7 @@ nonisolated struct AppDependencies: Sendable {
     self.stopBackgroundWork = stopBackgroundWork
   }
 
-  /// Real login and chat against the gateway. Calls are real only when a VoIP origin is configured
-  /// (`-voipURL`); otherwise they stay mocked.
+  /// Real login, chat and calls against the dev services. Pass `voip: nil` to leave calls unconfigured.
   static func live(
     configuration: AuthConfiguration, gateway: GatewayConfiguration = GatewayConfiguration(),
     voip: VoIPConfiguration? = VoIPConfiguration(), useSystemCalls: Bool = true,
@@ -91,7 +90,9 @@ nonisolated struct AppDependencies: Sendable {
   }
 
   /// Real login by default; `-demo-mock` or `-demo-immediateEvents` (UI tests) selects the full mock.
-  static func launch(arguments: [String] = ProcessInfo.processInfo.arguments) -> AppDependencies {
+  static func launch(
+    arguments: [String] = ProcessInfo.processInfo.arguments, useSystemCalls: Bool = true
+  ) -> AppDependencies {
     let useMock = arguments.contains("-demo-mock") || arguments.contains("-demo-immediateEvents")
     guard !useMock else {
       authLog.notice("auth: using MOCK client")
@@ -102,7 +103,7 @@ nonisolated struct AppDependencies: Sendable {
     authLog.notice(
       "auth: using LIVE client \(endpoint, privacy: .public) app_id=\(configuration.appID, privacy: .public)"
     )
-    return live(configuration: configuration)
+    return live(configuration: configuration, useSystemCalls: useSystemCalls)
   }
 
   static func mock(arguments: [String] = ProcessInfo.processInfo.arguments) -> AppDependencies {

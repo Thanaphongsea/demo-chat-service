@@ -29,7 +29,7 @@ The handoff is the future source for HTTP actions, authenticated native WebSocke
 
 ## Live adapter, phase 2A (signalling only)
 
-`LiveCallClient` talks to the VoIP REST API (`-voipURL`, no default) when that launch argument is set; otherwise the app keeps `MockCallClient` and its demo actions. It is unit-tested against scripted responses built from the handoff contract and has **not** been run against a real VoIP service: the dev tunnel returns 404 for `/api/*` and nothing listens on `localhost:8080`.
+`LiveCallClient` talks to the VoIP REST API at `VoIPConfiguration.dev` (a quick tunnel whose URL changes when restarted; override with `-voipURL`). Without a configured service (`voip: nil`) the app uses `UnconfiguredCallClient`: demo actions work, real conversations are refused with an explanation. It is unit-tested against scripted responses, and **its signalling was verified once against the dev VoIP service on 2026-10-29** (`LiveCallSmokeTests`): a direct call (create → ringing, answer → active, end), and a group call on `g_test` (decline → `can_join`, rejoin, leave keeps `can_join`, creator end-all clears it). The dev service's `/api/health`, `/api/ice` (STUN plus TURN over UDP and TCP) and JWT acceptance were checked too. Media was not exercised.
 
 | Product action | Wire call |
 |---|---|

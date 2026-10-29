@@ -274,7 +274,7 @@ nonisolated struct LiveAuthClientTests {
 
   @Test("Launch uses live auth by default and the mock for demo flags")
   func launchSelection() async throws {
-    #expect(AppDependencies.launch(arguments: []).auth is LiveAuthClient)
+    #expect(AppDependencies.launch(arguments: [], useSystemCalls: false).auth is LiveAuthClient)
     #expect(AppDependencies.launch(arguments: ["-demo-mock"]).auth is MockAuthClient)
     #expect(AppDependencies.launch(arguments: ["-demo-immediateEvents"]).auth is MockAuthClient)
   }

@@ -4,18 +4,23 @@ import OSLog
 nonisolated let callLog = Logger(subsystem: "com.example.ChatCall", category: "call")
 
 /// The VoIP origin: `/api/calls`, `/api/rooms`, `/api/ice` and the media socket share it.
-/// There is no default; set `-voipURL` (HTTPS for a real device, `127.0.0.1` only reaches the simulator's Mac).
+/// Defaults to the dev service; override with `-voipURL` (HTTPS for a real device: `127.0.0.1` on an
+/// iPhone is the iPhone itself).
 nonisolated struct VoIPConfiguration: Equatable, Sendable {
   let baseURL: URL
 
   init(baseURL: URL) { self.baseURL = baseURL }
 
-  /// Nil unless `voipURL` is an http(s) URL, so an unconfigured app keeps its mock calls.
-  init?(defaults: UserDefaults = .standard) {
-    guard let url = defaults.string(forKey: "voipURL").flatMap(URL.init(string:)),
-      url.scheme == "https" || url.scheme == "http", url.host != nil
-    else { return nil }
-    self.init(baseURL: url)
+  /// Dev service. The quick tunnel URL changes when it is restarted; update it here or override at launch.
+  static let dev = VoIPConfiguration(
+    baseURL: URL(string: "https://unset.invalid")!)
+
+  /// Launch-argument override on top of `dev`; an invalid override is ignored.
+  init(defaults: UserDefaults = .standard) {
+    let url = defaults.string(forKey: "voipURL").flatMap(URL.init(string:)).flatMap {
+      ($0.scheme == "https" || $0.scheme == "http") && $0.host != nil ? $0 : nil
+    }
+    self.init(baseURL: url ?? Self.dev.baseURL)
   }
 }
 
