@@ -3,23 +3,6 @@ import Testing
 
 @testable import ChatCall
 
-private nonisolated final class StubTransport: HTTPTransport, @unchecked Sendable {
-  private let lock = NSLock()
-  private var recorded: [URLRequest] = []
-  let handler: @Sendable (URLRequest) async throws -> (Int, Data)
-  init(_ handler: @escaping @Sendable (URLRequest) async throws -> (Int, Data)) {
-    self.handler = handler
-  }
-  var requests: [URLRequest] { lock.withLock { recorded } }
-  func send(_ request: URLRequest) async throws -> (Data, HTTPURLResponse) {
-    lock.withLock { recorded.append(request) }
-    let (status, data) = try await handler(request)
-    let response = HTTPURLResponse(
-      url: request.url!, statusCode: status, httpVersion: nil, headerFields: nil)!
-    return (data, response)
-  }
-}
-
 nonisolated struct LiveAuthClientTests {
   private static let configuration = AuthConfiguration(
     baseURL: URL(string: "https://auth.example.test")!, appID: "1400000000")
