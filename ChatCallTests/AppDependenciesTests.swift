@@ -9,10 +9,16 @@ struct AppDependenciesTests {
   func selection() {
     let live = AppDependencies.live(
       configuration: .dev, gateway: GatewayConfiguration(httpBase: URL(string: "https://gw.test")!),
-      arguments: [])
+      voip: nil, arguments: [])
     #expect(live.auth is LiveAuthClient)
     #expect(live.chat is LiveChatClient)
     #expect(live.calls is MockCallClient)
+    #expect(live.demoCalls)
+    let withVoIP = AppDependencies.live(
+      configuration: .dev, gateway: GatewayConfiguration(httpBase: URL(string: "https://gw.test")!),
+      voip: VoIPConfiguration(baseURL: URL(string: "https://voip.test")!), arguments: [])
+    #expect(withVoIP.calls is LiveCallClient)
+    #expect(!withVoIP.demoCalls)
     let mock = AppDependencies.launch(arguments: ["-demo-mock"])
     #expect(mock.chat is MockChatClient)
   }

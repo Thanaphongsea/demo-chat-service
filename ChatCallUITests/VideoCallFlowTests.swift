@@ -86,6 +86,7 @@ nonisolated final class VideoCallFlowTests: XCTestCase {
   private func signedIn() -> XCUIApplication {
     continueAfterFailure = false
     let app = XCUIApplication()
+    app.launchArguments = ["-demo-mock"]  // the default launch signs in against the live service
     app.launch()
     let username = app.textFields["auth.username"]
     XCTAssertTrue(username.waitForExistence(timeout: 5))

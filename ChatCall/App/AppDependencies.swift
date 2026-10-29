@@ -28,24 +28,29 @@ nonisolated struct AppDependencies: Sendable {
   let chat: any ChatClient
   let calls: any CallClient
   let sessionEnded: SessionEndedSignal
+  /// True while calls are the mock: the Calls tab then offers its demo actions.
+  let demoCalls: Bool
   /// Stops background work that outlives a screen, e.g. the realtime socket, on sign-out.
   let stopBackgroundWork: @Sendable () async -> Void
 
   init(
     auth: any AuthClient, chat: any ChatClient, calls: any CallClient,
-    sessionEnded: SessionEndedSignal = SessionEndedSignal(),
+    sessionEnded: SessionEndedSignal = SessionEndedSignal(), demoCalls: Bool = true,
     stopBackgroundWork: @escaping @Sendable () async -> Void = {}
   ) {
     self.auth = auth
     self.chat = chat
     self.calls = calls
     self.sessionEnded = sessionEnded
+    self.demoCalls = demoCalls
     self.stopBackgroundWork = stopBackgroundWork
   }
 
-  /// Real login and chat against the gateway; calls stay mocked until the VoIP client lands.
+  /// Real login and chat against the gateway. Calls are real only when a VoIP origin is configured
+  /// (`-voipURL`); otherwise they stay mocked.
   static func live(
     configuration: AuthConfiguration, gateway: GatewayConfiguration = GatewayConfiguration(),
+    voip: VoIPConfiguration? = VoIPConfiguration(),
     arguments: [String] = ProcessInfo.processInfo.arguments
   ) -> AppDependencies {
     let mocked = mock(arguments: arguments)
@@ -60,9 +65,24 @@ nonisolated struct AppDependencies: Sendable {
         await auth.signOut()
         signal.fire()
       })
+    guard let voip else {
+      return AppDependencies(
+        auth: auth, chat: chat, calls: mocked.calls, sessionEnded: signal,
+        stopBackgroundWork: { await chat.stopRealtime() })
+    }
+    let calls = LiveCallClient(
+      api: VoIPClient(configuration: voip, tokens: auth),
+      currentUser: { await auth.currentSession?.user },
+      onSessionEnded: {
+        await auth.signOut()
+        signal.fire()
+      })
     return AppDependencies(
-      auth: auth, chat: chat, calls: mocked.calls, sessionEnded: signal,
-      stopBackgroundWork: { await chat.stopRealtime() })
+      auth: auth, chat: chat, calls: calls, sessionEnded: signal, demoCalls: false,
+      stopBackgroundWork: {
+        await chat.stopRealtime()
+        await calls.stopMonitoring()
+      })
   }
 
   /// Real login by default; `-demo-mock` or `-demo-immediateEvents` (UI tests) selects the full mock.

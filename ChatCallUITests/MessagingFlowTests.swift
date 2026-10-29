@@ -77,7 +77,7 @@ nonisolated final class MessagingFlowTests: XCTestCase {
   private func signedIn(arguments: [String] = [], immediate: Bool = true) -> XCUIApplication {
     continueAfterFailure = false
     let app = XCUIApplication()
-    app.launchArguments = (immediate ? ["-demo-immediateEvents"] : []) + arguments
+    app.launchArguments = (immediate ? ["-demo-immediateEvents"] : ["-demo-mock"]) + arguments
     app.launch()
     let username = app.textFields["auth.username"]
     XCTAssertTrue(username.waitForExistence(timeout: 5))

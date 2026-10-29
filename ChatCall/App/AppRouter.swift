@@ -29,10 +29,13 @@ final class AppRouter {
   private let chatClient: any ChatClient
   @ObservationIgnored private var rooms: [ConversationID: ChatRoomStore] = [:]
 
-  init(chatClient: any ChatClient, callClient: any CallClient = MockCallClient()) {
+  init(
+    chatClient: any ChatClient, callClient: any CallClient = MockCallClient(),
+    demoCalls: Bool = true
+  ) {
     self.chatClient = chatClient
     conversations = ConversationListStore(client: chatClient)
-    callStore = CallStore(client: callClient, chatClient: chatClient)
+    callStore = CallStore(client: callClient, chatClient: chatClient, demoEnabled: demoCalls)
   }
 
   func presentComposer(currentUserID: UserID) {
