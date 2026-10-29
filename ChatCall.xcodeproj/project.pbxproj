@@ -17,6 +17,7 @@
 		0F47EC77447B3BFFBABF6C21 /* StaticTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1FC3B24B67FC57F3D9A34F1 /* StaticTokens.swift */; };
 		1221E5209C03FA4494C0C7D6 /* GatewayClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E93485A79872B9E415EDCF1 /* GatewayClient.swift */; };
 		163F0A287F4FCA0C1EF050CE /* ChatMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0B7E707AF66449E13DC0BE8 /* ChatMapper.swift */; };
+		16EE562EBFA829932ED8DFBD /* AudioSessionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E12FC0A5F9DF223635764C1F /* AudioSessionController.swift */; };
 		180947C6C4E56D2F57AC03E5 /* MediaSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DEC98B462B64506D926A1D7 /* MediaSessionTests.swift */; };
 		1A51CF31A9F72248EF0BB20D /* MessagingFlowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7C4A736AC9F94DF53DAD412 /* MessagingFlowTests.swift */; };
 		1D2D1EC7492FF03707D68D39 /* DemoScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC3C5209370B7E36628DD9E3 /* DemoScheduler.swift */; };
@@ -26,6 +27,7 @@
 		2BA11C776DB0B4EFB50635F0 /* ConversationListStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEA44074347F79A6A79D0AD9 /* ConversationListStore.swift */; };
 		2FEA694732301B5F3A8D14D0 /* LiveAuthClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = E98A4B45FAF6DF8599058075 /* LiveAuthClient.swift */; };
 		3053EE9467D86A33106016CB /* AuthModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FABCF766BC4BF9646488ACD /* AuthModels.swift */; };
+		36B0DB1F950FC9DDF7502ACF /* WebRTC in Frameworks */ = {isa = PBXBuildFile; productRef = DD3BC7AB50FF20E24E63273D /* WebRTC */; };
 		36FEC174D2478BC603FD7F58 /* CallFixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7531671A29765640511EA3BB /* CallFixtures.swift */; };
 		37C63CC0797B41C29A2513E7 /* ChatCallApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 752695A44AB5CF906A3CD088 /* ChatCallApp.swift */; };
 		37CB69F798E9ED6803554566 /* GroupDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34359E18B542C62E8AA8202F /* GroupDetailsView.swift */; };
@@ -40,6 +42,7 @@
 		5276ED7AA0C0C061ADA01A0D /* ChatRoomStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C38F9E64C4451991558AB459 /* ChatRoomStoreTests.swift */; };
 		529586BD8F9A239F9BBC147C /* CallsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CCA04D0637952B19174E39C /* CallsListView.swift */; };
 		54059BF0818004FBC4B690C9 /* AppDependenciesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18EED4DE65063E9A5874F341 /* AppDependenciesTests.swift */; };
+		544F39B90D45F8B4A360EB8B /* MediaRenderHub.swift in Sources */ = {isa = PBXBuildFile; fileRef = B14657C1978E46E9F25BD729 /* MediaRenderHub.swift */; };
 		584B3C458212F52ECC2400FC /* AsyncTestSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 206B63EA4A97BEFE041FAD1B /* AsyncTestSupport.swift */; };
 		5E3AA1F3FF520C8748485C9D /* NewConversationStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F93D942934993EAE181E4852 /* NewConversationStore.swift */; };
 		6342A136994437BBEC8AFC96 /* RealtimeEventTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4126E257A8D41187F8E1D6FE /* RealtimeEventTests.swift */; };
@@ -93,6 +96,7 @@
 		D67C249BF8BB960B0BC34246 /* ConversationListFixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE73371421C67CABBD090007 /* ConversationListFixtures.swift */; };
 		D7D1E51B6F0618F2F7C9FD7E /* CallStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 492F6C27BF2A5936BB3C70D7 /* CallStoreTests.swift */; };
 		DAD1A5D0708ED65D197BD1AF /* UnreadBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD3B528F3FD122A5B355532B /* UnreadBadge.swift */; };
+		DB62A89C737FF9AF1620C9CD /* WebRTCPeer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C9F4FD42D513AA3F31450CF /* WebRTCPeer.swift */; };
 		DB75D112B41B71D5405ED6C8 /* SignalMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CEE17F233EED21301C55A50 /* SignalMessage.swift */; };
 		E00860927E7AB1A61C1338D4 /* CallJoinTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D786377396B3675CCF1794E /* CallJoinTests.swift */; };
 		E09BB426378B36F87B0FE64A /* MockAuthClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C88325AD374FFBE79EC9E3C /* MockAuthClientTests.swift */; };
@@ -170,6 +174,7 @@
 		4FABCF766BC4BF9646488ACD /* AuthModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthModels.swift; sourceTree = "<group>"; };
 		560A946B02BB2F719DE1BF18 /* LiveChatClient.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LiveChatClient.swift; sourceTree = "<group>"; };
 		5C167F6965D067730C45E197 /* ChatCallUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = ChatCallUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		5C9F4FD42D513AA3F31450CF /* WebRTCPeer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WebRTCPeer.swift; sourceTree = "<group>"; };
 		5E93485A79872B9E415EDCF1 /* GatewayClient.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GatewayClient.swift; sourceTree = "<group>"; };
 		608E7BA7E8DDE931E57AD525 /* MediaFakes.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MediaFakes.swift; sourceTree = "<group>"; };
 		60CA0C4A65975950FFCA4273 /* DateSeparator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateSeparator.swift; sourceTree = "<group>"; };
@@ -208,12 +213,14 @@
 		AB07CD4AA79EE4E915C067CE /* LiveCallClient.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LiveCallClient.swift; sourceTree = "<group>"; };
 		AB7B74466983C780CCC3AE3D /* NewConversationStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewConversationStoreTests.swift; sourceTree = "<group>"; };
 		B12B204AEC18981234362273 /* LaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchTests.swift; sourceTree = "<group>"; };
+		B14657C1978E46E9F25BD729 /* MediaRenderHub.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MediaRenderHub.swift; sourceTree = "<group>"; };
 		B7CDCD907BD3B2CF7310421D /* ChatCall.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ChatCall.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BB282CA05123E285E90815E4 /* IncomingCallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomingCallView.swift; sourceTree = "<group>"; };
 		BEE2E271EB63263C19549235 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		C0F2A74E16FC80E04A90C459 /* NewConversationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewConversationTests.swift; sourceTree = "<group>"; };
 		C38F9E64C4451991558AB459 /* ChatRoomStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatRoomStoreTests.swift; sourceTree = "<group>"; };
 		C80A3A6C9ECB564D4C00FE1A /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
+		C870A7F49B13F573E3059600 /* Info-Additions.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Info-Additions.plist"; sourceTree = "<group>"; };
 		CD3B528F3FD122A5B355532B /* UnreadBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnreadBadge.swift; sourceTree = "<group>"; };
 		CD785C48F9062BD80D95C4A3 /* ChatClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatClient.swift; sourceTree = "<group>"; };
 		CFD78FE10DD589C1F3C59E8B /* OutgoingCallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutgoingCallView.swift; sourceTree = "<group>"; };
@@ -224,6 +231,7 @@
 		DD872BF08D749142A547E163 /* ChatWire.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ChatWire.swift; sourceTree = "<group>"; };
 		DEA44074347F79A6A79D0AD9 /* ConversationListStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationListStore.swift; sourceTree = "<group>"; };
 		E0244B0E1841D6FFE8810D4F /* GatewayError.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GatewayError.swift; sourceTree = "<group>"; };
+		E12FC0A5F9DF223635764C1F /* AudioSessionController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AudioSessionController.swift; sourceTree = "<group>"; };
 		E2A77C257760542A0C6B7751 /* VoIPClient.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoIPClient.swift; sourceTree = "<group>"; };
 		E8F95252518562DB1EF53BBA /* LiveCallMonitoringTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LiveCallMonitoringTests.swift; sourceTree = "<group>"; };
 		E98A4B45FAF6DF8599058075 /* LiveAuthClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveAuthClient.swift; sourceTree = "<group>"; };
@@ -247,6 +255,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C56B1655B505C4638693ADE6 /* SwiftCentrifuge in Frameworks */,
+				36B0DB1F950FC9DDF7502ACF /* WebRTC in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -257,6 +266,7 @@
 			isa = PBXGroup;
 			children = (
 				867FD7E19940CA34327FF333 /* Assets.xcassets */,
+				C870A7F49B13F573E3059600 /* Info-Additions.plist */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -279,6 +289,9 @@
 			children = (
 				9CEE17F233EED21301C55A50 /* SignalMessage.swift */,
 				1F0A08EEBCC286881C5BD372 /* MediaSession.swift */,
+				E12FC0A5F9DF223635764C1F /* AudioSessionController.swift */,
+				B14657C1978E46E9F25BD729 /* MediaRenderHub.swift */,
+				5C9F4FD42D513AA3F31450CF /* WebRTCPeer.swift */,
 			);
 			name = Media;
 			path = Media;
@@ -586,6 +599,7 @@
 			name = ChatCall;
 			packageProductDependencies = (
 				B82BA6CE6BE3117802DD95AE /* SwiftCentrifuge */,
+				DD3BC7AB50FF20E24E63273D /* WebRTC */,
 			);
 			productName = ChatCall;
 			productReference = B7CDCD907BD3B2CF7310421D /* ChatCall.app */;
@@ -616,6 +630,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				925ADFDE1960A7DD9E0F93B5 /* XCRemoteSwiftPackageReference "centrifuge-swift" */,
+				9E5020CAC90D9AC4C9D0F079 /* XCRemoteSwiftPackageReference "WebRTC" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 829D33ECC3AA7E60BB8BAB2E /* Products */;
@@ -762,6 +777,9 @@
 				BC917D4F47985F114DBAFE1F /* LiveCallClient.swift in Sources */,
 				DB75D112B41B71D5405ED6C8 /* SignalMessage.swift in Sources */,
 				4BD6026DD5A610BF8C3728D2 /* MediaSession.swift in Sources */,
+				16EE562EBFA829932ED8DFBD /* AudioSessionController.swift in Sources */,
+				544F39B90D45F8B4A360EB8B /* MediaRenderHub.swift in Sources */,
+				DB62A89C737FF9AF1620C9CD /* WebRTCPeer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -880,7 +898,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = "";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				DEVELOPMENT_TEAM = 55S5C7A3W7;
+				INFOPLIST_FILE = "ChatCall/Resources/Info-Additions.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = ChatCall;
+				INFOPLIST_KEY_NSCameraUsageDescription = "ChatCall uses the camera to send your video during a call.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "ChatCall uses the microphone to send your voice during a call.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
@@ -1000,7 +1021,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = "";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				DEVELOPMENT_TEAM = 55S5C7A3W7;
+				INFOPLIST_FILE = "ChatCall/Resources/Info-Additions.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = ChatCall;
+				INFOPLIST_KEY_NSCameraUsageDescription = "ChatCall uses the camera to send your video during a call.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "ChatCall uses the microphone to send your voice during a call.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
@@ -1064,6 +1088,14 @@
 				version = 0.10.4;
 			};
 		};
+		9E5020CAC90D9AC4C9D0F079 /* XCRemoteSwiftPackageReference "WebRTC" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/stasel/WebRTC";
+			requirement = {
+				kind = exactVersion;
+				version = 155.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -1071,6 +1103,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 925ADFDE1960A7DD9E0F93B5 /* XCRemoteSwiftPackageReference "centrifuge-swift" */;
 			productName = SwiftCentrifuge;
+		};
+		DD3BC7AB50FF20E24E63273D /* WebRTC */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9E5020CAC90D9AC4C9D0F079 /* XCRemoteSwiftPackageReference "WebRTC" */;
+			productName = WebRTC;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

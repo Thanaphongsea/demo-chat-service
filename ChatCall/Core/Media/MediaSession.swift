@@ -19,6 +19,13 @@ nonisolated protocol MediaPeer: Sendable {
   func close() async
 }
 
+nonisolated enum MediaError: Error, Equatable, Sendable {
+  /// The user refused a permission the call cannot run without (`"microphone"`).
+  case permissionDenied(String)
+  case peerConnectionFailed
+  case invalidDescription
+}
+
 nonisolated enum MediaState: Equatable, Sendable {
   case connecting
   case connected
@@ -132,6 +139,11 @@ actor MediaSession {
       do {
         try await connect(generation: g, callID: callID, roomID: roomID, attempt: &attempt)
       } catch is CancellationError {
+        return
+      } catch MediaError.permissionDenied(let what) {
+        guard g == generation else { return }
+        await teardown(generation: g)
+        emit(.state(.failed("\(what) access is denied")))
         return
       } catch let error as VoIPError where Self.isFatal(error) {
         guard g == generation else { return }
