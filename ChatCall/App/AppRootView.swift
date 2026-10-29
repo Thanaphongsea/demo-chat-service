@@ -24,7 +24,8 @@ struct AppRootView: View {
     let auth = AuthStore(client: dependencies.auth)
     let router = AppRouter(
       chatClient: dependencies.chat, callClient: dependencies.calls, demoCalls: dependencies.demoCalls,
-      systemCalls: dependencies.systemCalls)
+      systemCalls: dependencies.systemCalls,
+      callKitInApp: dependencies.callKitInApp)
     let stop = dependencies.stopBackgroundWork
     auth.resetAuthenticatedState = { [weak router] in
       router?.reset()

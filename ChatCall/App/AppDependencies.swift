@@ -32,13 +32,15 @@ nonisolated struct AppDependencies: Sendable {
   let demoCalls: Bool
   /// The system call UI (CallKit); nil while calls are mocked.
   let systemCalls: (any SystemCallAdapter)?
+  /// Mirror in-app calls to CallKit too (`-callKitInApp`); off by default.
+  let callKitInApp: Bool
   /// Stops background work that outlives a screen, e.g. the realtime socket, on sign-out.
   let stopBackgroundWork: @Sendable () async -> Void
 
   init(
     auth: any AuthClient, chat: any ChatClient, calls: any CallClient,
     sessionEnded: SessionEndedSignal = SessionEndedSignal(), demoCalls: Bool = true,
-    systemCalls: (any SystemCallAdapter)? = nil,
+    systemCalls: (any SystemCallAdapter)? = nil, callKitInApp: Bool = false,
     stopBackgroundWork: @escaping @Sendable () async -> Void = {}
   ) {
     self.auth = auth
@@ -47,6 +49,7 @@ nonisolated struct AppDependencies: Sendable {
     self.sessionEnded = sessionEnded
     self.demoCalls = demoCalls
     self.systemCalls = systemCalls
+    self.callKitInApp = callKitInApp
     self.stopBackgroundWork = stopBackgroundWork
   }
 
@@ -54,6 +57,7 @@ nonisolated struct AppDependencies: Sendable {
   static func live(
     configuration: AuthConfiguration, gateway: GatewayConfiguration = GatewayConfiguration(),
     voip: VoIPConfiguration? = VoIPConfiguration(), useSystemCalls: Bool = true,
+    callKitInApp: Bool = false,
     arguments: [String] = ProcessInfo.processInfo.arguments
   ) -> AppDependencies {
     let auth = LiveAuthClient(configuration: configuration)
@@ -82,7 +86,7 @@ nonisolated struct AppDependencies: Sendable {
       }, media: .live)
     return AppDependencies(
       auth: auth, chat: chat, calls: calls, sessionEnded: signal, demoCalls: false,
-      systemCalls: systemCalls,
+      systemCalls: systemCalls, callKitInApp: callKitInApp,
       stopBackgroundWork: {
         await chat.stopRealtime()
         await calls.stopMonitoring()
@@ -103,7 +107,9 @@ nonisolated struct AppDependencies: Sendable {
     authLog.notice(
       "auth: using LIVE client \(endpoint, privacy: .public) app_id=\(configuration.appID, privacy: .public)"
     )
-    return live(configuration: configuration, useSystemCalls: useSystemCalls)
+    return live(
+      configuration: configuration, useSystemCalls: useSystemCalls,
+      callKitInApp: arguments.contains("-callKitInApp"), arguments: arguments)
   }
 
   static func mock(arguments: [String] = ProcessInfo.processInfo.arguments) -> AppDependencies {

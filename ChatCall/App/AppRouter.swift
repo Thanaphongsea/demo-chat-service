@@ -32,14 +32,16 @@ final class AppRouter {
 
   init(
     chatClient: any ChatClient, callClient: any CallClient = MockCallClient(),
-    demoCalls: Bool = true, systemCalls: (any SystemCallAdapter)? = nil
+    demoCalls: Bool = true, systemCalls: (any SystemCallAdapter)? = nil,
+    callKitInApp: Bool = false
   ) {
     self.chatClient = chatClient
     conversations = ConversationListStore(client: chatClient)
     let store = CallStore(client: callClient, chatClient: chatClient, demoEnabled: demoCalls)
     callStore = store
     self.systemCalls = systemCalls.map {
-      SystemCallCoordinator(store: store, client: callClient, adapter: $0)
+      SystemCallCoordinator(
+        store: store, client: callClient, adapter: $0, mirrorInAppCalls: callKitInApp)
     }
   }
 

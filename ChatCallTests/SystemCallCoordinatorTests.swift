@@ -12,12 +12,14 @@ struct SystemCallCoordinatorTests {
     let coordinator: SystemCallCoordinator
   }
 
-  private func rig(pushWait: Duration = .milliseconds(150), foreground: Bool = false) async -> Rig {
+  private func rig(
+    pushWait: Duration = .milliseconds(150), foreground: Bool = false, mirrorInApp: Bool = false
+  ) async -> Rig {
     let client = MockCallClient()
     let store = CallStore(client: client, chatClient: MockChatClient())
     let adapter = FakeSystemCallAdapter()
     let coordinator = SystemCallCoordinator(
-      store: store, client: client, adapter: adapter, pushWait: pushWait, isForeground: { foreground })
+      store: store, client: client, adapter: adapter, pushWait: pushWait, isForeground: { foreground }, mirrorInAppCalls: mirrorInApp)
     coordinator.start()
     await store.start()
     try? await Task.sleep(for: .milliseconds(20))
@@ -84,6 +86,28 @@ struct SystemCallCoordinatorTests {
     try await Task.sleep(for: .milliseconds(60))
     #expect(rig.adapter.commands.isEmpty)
     #expect(AudioSessionController.systemActivatesAudio == false)
+    finish(rig)
+  }
+
+  @Test("With -callKitInApp every call is mirrored: incoming, answered, outgoing, connected, ended")
+  func mirrorsInAppCallsWhenAsked() async throws {
+    let rig = await rig(foreground: true, mirrorInApp: true)
+    _ = try await rig.client.demoIncomingCall(kind: .direct)
+    try #require(await waitUntil { rig.store.call?.state == .incoming })
+    await rig.store.answer()
+    try #require(await waitUntil { rig.adapter.commands.contains("answered") })
+    await rig.store.end()
+    try #require(await waitUntil { rig.adapter.commands.contains("ended(remoteEnded)") })
+    #expect(rig.adapter.commands.first?.hasPrefix("incoming(") == true)
+    #expect(AudioSessionController.systemActivatesAudio == false)  // cleared once the call ended
+    rig.store.dismiss()
+
+    let conversation = try #require(try await MockChatClient().listConversations().first { $0.kind == .direct })
+    await rig.store.startVideo(in: conversation.id)
+    try #require(await waitUntil { rig.adapter.commands.contains("outgoingConnected") })
+    #expect(rig.adapter.commands.contains { $0.hasPrefix("outgoingStarted(") })
+    await rig.store.end()
+    try #require(await waitUntil { rig.adapter.commands.filter { $0 == "ended(remoteEnded)" }.count == 2 })
     finish(rig)
   }
 

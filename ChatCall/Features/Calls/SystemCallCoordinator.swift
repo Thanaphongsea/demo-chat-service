@@ -18,6 +18,8 @@ final class SystemCallCoordinator {
   /// Calls the system call UI knows about; only these are mirrored to CallKit.
   private var reported: Set<CallID> = []
   private let isForeground: @MainActor () -> Bool
+  /// Also mirror calls placed and answered inside the app (`-callKitInApp`). Off by default: see the type note.
+  private let mirrorInAppCalls: Bool
   private var eventTask: Task<Void, Never>?
   private var actionTask: Task<Void, Never>?
   private let pushWait: Duration
@@ -25,9 +27,11 @@ final class SystemCallCoordinator {
   init(
     store: CallStore, client: any CallClient, adapter: any SystemCallAdapter,
     pushWait: Duration = .seconds(8),
-    isForeground: @escaping @MainActor () -> Bool = { UIApplication.shared.applicationState == .active }
+    isForeground: @escaping @MainActor () -> Bool = { UIApplication.shared.applicationState == .active },
+    mirrorInAppCalls: Bool = false
   ) {
     self.isForeground = isForeground
+    self.mirrorInAppCalls = mirrorInAppCalls
     self.store = store
     self.client = client
     self.adapter = adapter
@@ -102,21 +106,27 @@ final class SystemCallCoordinator {
     let name = call.displayName
     switch call.state {
     case .incoming:
-      // A push may have reported this call already; otherwise only report it when the app is not open.
-      if uuids[call.id] == nil, !isForeground() {
-        let uuid = UUID()
-        uuids[call.id] = uuid
-        reported.insert(call.id)
-        AudioSessionController.systemActivatesAudio = true
+      // A push may have reported this call already; otherwise report it when the app is not open,
+      // or always when in-app calls are mirrored.
+      if uuids[call.id] == nil, mirrorInAppCalls || !isForeground() {
+        let uuid = beginReporting(call.id)
         adapter.reportIncoming(uuid: uuid, name: name, hasVideo: true)
       }
     case .ringing:
-      break  // an outgoing call is placed from inside the app
+      if previous == nil, mirrorInAppCalls {
+        adapter.reportOutgoingStarted(uuid: beginReporting(call.id), name: name, hasVideo: true)
+      }
     case .active:
+      if previous == nil, mirrorInAppCalls, !reported.contains(call.id) {
+        // Joined or rejoined straight into a live call.
+        adapter.reportOutgoingStarted(uuid: beginReporting(call.id), name: name, hasVideo: true)
+      }
       guard reported.contains(call.id), let uuid = uuids[call.id] else { break }
-      // An answer made in the system UI already told the system; only an in-app answer must.
-      if previous == .incoming, systemAnswered.remove(uuid) == nil {
-        adapter.reportAnswered(uuid: uuid)
+      if previous == .incoming {
+        // An answer made in the system UI already told the system; only an in-app answer must.
+        if systemAnswered.remove(uuid) == nil { adapter.reportAnswered(uuid: uuid) }
+      } else if previous != .reconnecting {
+        adapter.reportOutgoingConnected(uuid: uuid)
       }
     case .reconnecting:
       break
@@ -127,6 +137,15 @@ final class SystemCallCoordinator {
       systemAnswered.remove(uuid)
       if reported.isEmpty { AudioSessionController.systemActivatesAudio = false }
     }
+  }
+
+  /// Starts mirroring a call to the system UI and tells WebRTC that CallKit will activate the audio session.
+  private func beginReporting(_ id: CallID) -> UUID {
+    let uuid = UUID()
+    uuids[id] = uuid
+    reported.insert(id)
+    AudioSessionController.systemActivatesAudio = true
+    return uuid
   }
 
   private static func reason(for state: CallState) -> SystemCallEnd {
