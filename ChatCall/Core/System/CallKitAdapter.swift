@@ -23,15 +23,19 @@ nonisolated final class CallKitAdapter: NSObject, SystemCallAdapter, CXProviderD
     (userActions, continuation) = AsyncStream<SystemCallAction>.makeStream()
     super.init()
     provider.setDelegate(self, queue: nil)
-    AudioSessionController.systemActivatesAudio = true
   }
 
   // MARK: SystemCallAdapter
 
   func reportIncoming(uuid: UUID, name: String, hasVideo: Bool) {
+    systemCallLog.notice("reportIncoming \(uuid.uuidString.prefix(8), privacy: .public)")
     provider.reportNewIncomingCall(with: uuid, update: Self.update(name: name, hasVideo: hasVideo)) {
       error in
-      if let error { systemCallLog.error("incoming call not shown: \(error.localizedDescription, privacy: .public)") }
+      if let error {
+        systemCallLog.error("incoming call not shown: \(error.localizedDescription, privacy: .public)")
+      } else {
+        systemCallLog.notice("incoming call shown \(uuid.uuidString.prefix(8), privacy: .public)")
+      }
     }
   }
 
@@ -45,7 +49,10 @@ nonisolated final class CallKitAdapter: NSObject, SystemCallAdapter, CXProviderD
     provider.reportOutgoingCall(with: uuid, connectedAt: nil)
   }
 
-  func reportAnswered(uuid: UUID) { request(CXAnswerCallAction(call: uuid)) }
+  func reportAnswered(uuid: UUID) {
+    systemCallLog.notice("reportAnswered \(uuid.uuidString.prefix(8), privacy: .public)")
+    request(CXAnswerCallAction(call: uuid))
+  }
 
   func reportEnded(uuid: UUID, reason: SystemCallEnd) {
     let mapped: CXCallEndedReason =
@@ -55,6 +62,7 @@ nonisolated final class CallKitAdapter: NSObject, SystemCallAdapter, CXProviderD
       case .unanswered: .unanswered
       case .failed: .failed
       }
+    systemCallLog.notice("reportEnded \(uuid.uuidString.prefix(8), privacy: .public) \(String(describing: reason), privacy: .public)")
     provider.reportCall(with: uuid, endedAt: nil, reason: mapped)
   }
 
@@ -68,11 +76,13 @@ nonisolated final class CallKitAdapter: NSObject, SystemCallAdapter, CXProviderD
   }
 
   func provider(_ provider: CXProvider, perform action: CXAnswerCallAction) {
+    systemCallLog.notice("system answer \(action.callUUID.uuidString.prefix(8), privacy: .public)")
     continuation.yield(.answer(action.callUUID))
     action.fulfill()
   }
 
   func provider(_ provider: CXProvider, perform action: CXEndCallAction) {
+    systemCallLog.notice("system end \(action.callUUID.uuidString.prefix(8), privacy: .public)")
     continuation.yield(.end(action.callUUID))
     action.fulfill()
   }
@@ -83,6 +93,7 @@ nonisolated final class CallKitAdapter: NSObject, SystemCallAdapter, CXProviderD
   }
 
   func provider(_ provider: CXProvider, didActivate audioSession: AVAudioSession) {
+    systemCallLog.notice("CallKit activated the audio session")
     AudioSessionController.systemDidActivate(audioSession)
   }
 

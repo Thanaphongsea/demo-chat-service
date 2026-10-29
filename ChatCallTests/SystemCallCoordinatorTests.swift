@@ -12,11 +12,12 @@ struct SystemCallCoordinatorTests {
     let coordinator: SystemCallCoordinator
   }
 
-  private func rig(pushWait: Duration = .milliseconds(150)) async -> Rig {
+  private func rig(pushWait: Duration = .milliseconds(150), foreground: Bool = false) async -> Rig {
     let client = MockCallClient()
     let store = CallStore(client: client, chatClient: MockChatClient())
     let adapter = FakeSystemCallAdapter()
-    let coordinator = SystemCallCoordinator(store: store, client: client, adapter: adapter, pushWait: pushWait)
+    let coordinator = SystemCallCoordinator(
+      store: store, client: client, adapter: adapter, pushWait: pushWait, isForeground: { foreground })
     coordinator.start()
     await store.start()
     try? await Task.sleep(for: .milliseconds(20))
@@ -52,7 +53,7 @@ struct SystemCallCoordinatorTests {
     finish(rig)
   }
 
-  @Test("Declined and missed calls end with the matching system reason")
+  @Test("A declined call ends with the matching system reason; a call missed before it rang is not reported")
   func endReasons() async throws {
     let declined = await rig()
     _ = try await declined.client.demoIncomingCall(kind: .direct)
@@ -61,22 +62,39 @@ struct SystemCallCoordinatorTests {
     try #require(await waitUntil { declined.adapter.commands.contains("ended(declined)") })
     finish(declined)
 
+    // A call that is already missed when first seen never rang in the system, so there is nothing to end.
     let missed = await rig()
     _ = try await missed.client.demoMissedCall(kind: .direct)
-    try #require(await waitUntil { missed.adapter.commands.contains("ended(unanswered)") })
+    try #require(await waitUntil { missed.store.history.count == 1 })
+    #expect(missed.adapter.commands.isEmpty)
     finish(missed)
   }
 
-  @Test("An outgoing call is started and connected in the system, then ended")
-  func outgoing() async throws {
-    let rig = await rig()
+  @Test("Calls placed and answered while the app is open never reach CallKit")
+  func foregroundCallsStayInApp() async throws {
+    let rig = await rig(foreground: true)
     let conversation = try #require(try await MockChatClient().listConversations().first { $0.kind == .direct })
-    await rig.store.startVideo(in: conversation.id)
-    try #require(await waitUntil { rig.adapter.commands.contains("outgoingConnected") })
-    #expect(rig.adapter.commands.first?.hasPrefix("outgoingStarted(") == true)
+    await rig.store.startVideo(in: conversation.id)  // outgoing
+    try #require(await waitUntil { rig.store.call?.state == .active })
     await rig.store.end()
-    try #require(await waitUntil { rig.adapter.commands.contains("ended(remoteEnded)") })
+    _ = try await rig.client.demoIncomingCall(kind: .direct)
+    try #require(await waitUntil { rig.store.call?.state == .incoming })
+    await rig.store.answer()
+    await rig.store.end()
+    try await Task.sleep(for: .milliseconds(60))
+    #expect(rig.adapter.commands.isEmpty)
+    #expect(AudioSessionController.systemActivatesAudio == false)
     finish(rig)
+  }
+
+  @Test("A push is shown in the system UI even when the app is open, and audio then waits for CallKit")
+  func pushIsReportedInForeground() async throws {
+    let rig = await rig(pushWait: .seconds(30), foreground: true)
+    rig.coordinator.handlePush(callID: "call-1", callerName: "Bob")
+    #expect(rig.adapter.commands == ["incoming(Bob,video=true)"])
+    #expect(AudioSessionController.systemActivatesAudio == true)
+    finish(rig)
+    #expect(AudioSessionController.systemActivatesAudio == false)
   }
 
   @Test("Answering from the system UI answers the call and is not echoed back to the system")

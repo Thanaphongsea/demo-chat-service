@@ -1,7 +1,10 @@
 import Foundation
+import UIKit
 
-/// Keeps the system call UI (CallKit) and the app's call state in step: reports incoming, outgoing and
-/// ended calls, routes the user's system actions into the store, and reports push-delivered calls at once.
+/// Keeps the system call UI (CallKit) and the app's call state in step. CallKit is used only for calls the
+/// app cannot show itself, i.e. those delivered by a VoIP push while it is not in the foreground. While the
+/// app is open the in-app call screen is the call UI and the app manages audio itself: reporting those calls
+/// to CallKit as well made it end a freshly answered call and never activate the audio session.
 @MainActor
 final class SystemCallCoordinator {
   private let store: CallStore
@@ -12,14 +15,19 @@ final class SystemCallCoordinator {
   private var systemAnswered: Set<UUID> = []
   /// Calls reported from a push whose server call has not been matched yet.
   private var pendingPushes: Set<UUID> = []
+  /// Calls the system call UI knows about; only these are mirrored to CallKit.
+  private var reported: Set<CallID> = []
+  private let isForeground: @MainActor () -> Bool
   private var eventTask: Task<Void, Never>?
   private var actionTask: Task<Void, Never>?
   private let pushWait: Duration
 
   init(
     store: CallStore, client: any CallClient, adapter: any SystemCallAdapter,
-    pushWait: Duration = .seconds(8)
+    pushWait: Duration = .seconds(8),
+    isForeground: @escaping @MainActor () -> Bool = { UIApplication.shared.applicationState == .active }
   ) {
+    self.isForeground = isForeground
     self.store = store
     self.client = client
     self.adapter = adapter
@@ -53,6 +61,8 @@ final class SystemCallCoordinator {
     states = [:]
     systemAnswered = []
     pendingPushes = []
+    reported = []
+    AudioSessionController.systemActivatesAudio = false
   }
 
   /// A VoIP push arrived. The system requires an incoming call to be reported immediately, before any
@@ -61,7 +71,11 @@ final class SystemCallCoordinator {
     let id = callID.map { CallID($0) }
     if let id, uuids[id] != nil { return }
     let uuid = UUID()
-    if let id { uuids[id] = uuid }
+    if let id {
+      uuids[id] = uuid
+      reported.insert(id)
+    }
+    AudioSessionController.systemActivatesAudio = true
     pendingPushes.insert(uuid)
     adapter.reportIncoming(
       uuid: uuid, name: (callerName?.isEmpty == false ? callerName : nil) ?? "Incoming call",
@@ -85,31 +99,33 @@ final class SystemCallCoordinator {
     let previous = states[call.id]
     guard previous != call.state else { return }
     states[call.id] = call.state
-    let known = uuids[call.id]
-    let uuid = known ?? UUID()
-    uuids[call.id] = uuid
     let name = call.displayName
     switch call.state {
     case .incoming:
-      // A push may have reported this call already.
-      if known == nil { adapter.reportIncoming(uuid: uuid, name: name, hasVideo: true) }
+      // A push may have reported this call already; otherwise only report it when the app is not open.
+      if uuids[call.id] == nil, !isForeground() {
+        let uuid = UUID()
+        uuids[call.id] = uuid
+        reported.insert(call.id)
+        AudioSessionController.systemActivatesAudio = true
+        adapter.reportIncoming(uuid: uuid, name: name, hasVideo: true)
+      }
     case .ringing:
-      if previous == nil { adapter.reportOutgoingStarted(uuid: uuid, name: name, hasVideo: true) }
+      break  // an outgoing call is placed from inside the app
     case .active:
-      if previous == .incoming {
-        // An answer made in the system UI already told the system; only an in-app answer must.
-        if systemAnswered.remove(uuid) == nil { adapter.reportAnswered(uuid: uuid) }
-      } else {
-        if previous == nil { adapter.reportOutgoingStarted(uuid: uuid, name: name, hasVideo: true) }
-        adapter.reportOutgoingConnected(uuid: uuid)
+      guard reported.contains(call.id), let uuid = uuids[call.id] else { break }
+      // An answer made in the system UI already told the system; only an in-app answer must.
+      if previous == .incoming, systemAnswered.remove(uuid) == nil {
+        adapter.reportAnswered(uuid: uuid)
       }
     case .reconnecting:
       break
     case .declined, .missed, .ended:
+      defer { states.removeValue(forKey: call.id) }
+      guard reported.remove(call.id) != nil, let uuid = uuids.removeValue(forKey: call.id) else { break }
       adapter.reportEnded(uuid: uuid, reason: Self.reason(for: call.state))
-      uuids.removeValue(forKey: call.id)
-      states.removeValue(forKey: call.id)
       systemAnswered.remove(uuid)
+      if reported.isEmpty { AudioSessionController.systemActivatesAudio = false }
     }
   }
 
@@ -131,6 +147,7 @@ final class SystemCallCoordinator {
       guard await waitForCall(id) else { return }
       await store.answer()
     case .end(let uuid):
+      callLog.notice("coordinator: system end action")
       guard let id = callID(for: uuid) else { return }
       guard await waitForCall(id, brief: true), let call = store.call else { return }
       if call.state == .incoming { await store.decline() } else { await store.end() }

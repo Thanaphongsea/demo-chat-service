@@ -251,4 +251,33 @@ nonisolated struct LiveCallMonitoringTests {
     #expect(await rig.client.currentCall == nil)
     #expect(await rig.client.history().isEmpty)
   }
+
+  @Test("A poll already in flight when the user answers cannot overwrite the answer with the old state")
+  func staleRefreshDoesNotUndoAnAnswer() async throws {
+    let gate = AsyncStream<Void>.makeStream()
+    let router = Router()
+    router.ok("GET /api/calls", Self.ringingInbox())
+    router.ok("POST /api/calls/call-1/accept", CallFixtures.call(status: "accepted", caller: "bob", callee: "alice"))
+    let slow = StubTransport(reply: { request in
+      if request.httpMethod == "GET", request.url?.path == "/api/calls/call-1" {
+        for await _ in gate.stream { break }
+        return StubReply(200, Data(CallFixtures.call(status: "ringing", caller: "bob", callee: "alice").utf8))
+      }
+      return router.reply(for: request)
+    })
+    let api = VoIPClient(
+      configuration: VoIPConfiguration(baseURL: URL(string: "https://voip.example.test")!),
+      tokens: StaticTokens(), transport: slow, sleep: { _ in })
+    let client = LiveCallClient(
+      api: api, currentUser: { LiveCallClientTests.alice },
+      sleep: { _ in try? await Task.sleep(for: .seconds(3600)) })
+    await client.poll()  // discovers the incoming call
+    let polling = Task { await client.poll() }  // reads the state; held in flight
+    while !slow.requests.contains(where: { $0.url?.path == "/api/calls/call-1" }) { await Task.yield() }
+    let answered = try await client.answer(callID: CallID("call-1"))
+    #expect(answered.state == .active)
+    gate.continuation.yield()  // the old "ringing" answer arrives after the user answered
+    await polling.value
+    #expect(await client.currentCall?.state == .active)
+  }
 }

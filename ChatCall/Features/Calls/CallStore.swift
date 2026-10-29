@@ -75,6 +75,7 @@ final class CallStore {
 
   func end() async {
     guard let call, !call.state.isTerminal, call.state != .incoming else { return }
+    callLog.notice("store.end requested")
     await perform { [client] in try await client.end(callID: call.id) }
   }
 
@@ -292,6 +293,7 @@ final class CallStore {
 
   private func terminate(_ snapshot: CallSnapshot) async {
     guard !snapshot.state.isTerminal else { return }
+    callLog.notice("store.terminate (result arrived after reset or cancellation)")
     if snapshot.state == .incoming {
       _ = try? await client.decline(callID: snapshot.id)
     } else {

@@ -55,6 +55,9 @@ actor LiveCallClient: CallClient {
   private var mediaReconnecting = false
   private var mediaRoster: [UserID]?
   private var visibleVideo: [UserID] = []
+  /// Bumped when a user action starts and again when it finishes, so a poll that was already in flight
+  /// cannot overwrite the newer result with an older state.
+  private var actionRevision = 0
 
   private struct Controls {
     var microphone = true
@@ -117,6 +120,8 @@ actor LiveCallClient: CallClient {
       request = pending
     }
     pendingCreate = request
+    actionRevision += 1
+    defer { actionRevision += 1 }
     do {
       let wire = try await api.create(request)
       pendingCreate = nil
@@ -162,6 +167,8 @@ actor LiveCallClient: CallClient {
       throw CallError.callAlreadyInProgress
     }
     let me = try await requireUser()
+    actionRevision += 1
+    defer { actionRevision += 1 }
     do {
       let wire = try await api.perform(.join, id: callID.rawValue, peer: me.id)
       handled.insert(callID)
@@ -291,6 +298,7 @@ actor LiveCallClient: CallClient {
       (call.state == .active || call.state == .reconnecting
         || (call.state == .ringing && call.kind == .group))
       && now().timeIntervalSince(lastHeartbeat ?? .distantPast) >= heartbeatInterval
+    let revision = actionRevision
     let wire: WireCallInfo
     if heartbeatDue {
       lastHeartbeat = now()
@@ -298,12 +306,16 @@ actor LiveCallClient: CallClient {
     } else {
       wire = try await api.call(id: call.id.rawValue, peer: me)
     }
+    // An action ran while this request was in flight: its result is newer than this answer.
+    guard revision == actionRevision else { return }
     guard current?.id == call.id, current?.state.isTerminal == false else { return }
     try await commit(wire, me: me)
   }
 
   private func discover(me: UserID) async throws {
+    let revision = actionRevision
     let inbox = try await api.inbox(peer: me)
+    guard revision == actionRevision else { return }
     // Actions may have run while the request was in flight; a stale inbox must not undo them.
     guard current == nil || current?.state.isTerminal == true else { return }
     joinable = inbox.joinableCalls.compactMap { map($0, me: me) }
@@ -346,6 +358,8 @@ actor LiveCallClient: CallClient {
     guard let call = current, call.id == callID else { throw CallError.callNotFound }
     guard allowed.contains(call.state) else { throw CallError.invalidTransition }
     let me = try await requireUser()
+    actionRevision += 1
+    defer { actionRevision += 1 }
     do {
       let wire = try await api.perform(action, id: callID.rawValue, peer: me.id)
       handled.insert(callID)

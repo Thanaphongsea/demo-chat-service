@@ -151,9 +151,10 @@ actor MediaSession {
         emit(.state(.failed("media is not available for this call")))
         return
       } catch {
-        callLog.notice("media connection lost: \(String(describing: type(of: error)), privacy: .public)")
+        callLog.error("media[\(g)] lost: \(String(describing: error), privacy: .public)")
       }
       guard g == generation, !Task.isCancelled else { return }
+      callLog.notice("media[\(g)] socket closed; attempt \(attempt)")
       await teardown(generation: g)
       guard attempt < retryDelays.count else {
         emit(.state(.failed("the media connection could not be recovered")))
@@ -174,8 +175,10 @@ actor MediaSession {
   private func connect(generation g: Int, callID: String, roomID: String, attempt: inout Int)
     async throws
   {
+    callLog.notice("media[\(g)] prepare room")
     try await api.prepareRoom(callID: callID, roomID: roomID)
     let ice = try await api.iceServers()
+    callLog.notice("media[\(g)] ice servers: \(ice.count)")
     let socket = try await api.mediaSocket(roomID: roomID, callID: callID, peer: me)
     guard g == generation else { throw CancellationError() }
 
@@ -184,13 +187,16 @@ actor MediaSession {
     self.peer = peer
     self.transport = transport
     try await peer.start(iceServers: ice, microphone: microphone, camera: camera)
+    callLog.notice("media[\(g)] peer started")
     try await transport.connect(url: socket.url, token: socket.token)
+    callLog.notice("media[\(g)] socket connecting")
     guard g == generation else { throw CancellationError() }
 
     // Subscriptions go out before the initial offer so a phone never receives every video.
     lastSentVisible = nil
     await sendSubscriptionsIfChanged()
     try await transport.send(.offer(try await peer.createOffer()))
+    callLog.notice("media[\(g)] offer sent")
 
     let forwarder = Task { [weak self] in
       for await candidate in peer.localCandidates {
@@ -206,6 +212,7 @@ actor MediaSession {
       guard g == generation else { return }
       switch message {
       case .answer(let answer):
+        callLog.notice("media[\(g)] answer received")
         try await peer.acceptAnswer(answer)
         remoteReady = true
         attempt = 0

@@ -12,13 +12,13 @@ nonisolated private let callSmokeEnabled = !callSmokePassword.isEmpty && URL(str
 /// strips the prefix). No media: the peers are not started. This has never been run: no VoIP origin was reachable.
 @Suite(.enabled(if: callSmokeEnabled))
 nonisolated struct LiveCallSmokeTests {
-  private func client(_ name: String) async throws -> (LiveCallClient, User) {
+  private func client(_ name: String, media: MediaDependencies? = nil) async throws -> (LiveCallClient, User) {
     let auth = LiveAuthClient(
       configuration: .dev, store: InMemorySessionStore(), deviceID: "ios-qa-call-\(name)")
     let session = try await auth.signIn(credentials: Credentials(identity: name, password: callSmokePassword))
     let api = VoIPClient(
       configuration: VoIPConfiguration(baseURL: URL(string: callSmokeVoIP)!), tokens: auth)
-    return (LiveCallClient(api: api, currentUser: { session.user }), session.user)
+    return (LiveCallClient(api: api, currentUser: { session.user }, media: media), session.user)
   }
 
   private func waitFor(_ client: LiveCallClient, _ state: CallState) async -> Bool {
@@ -77,5 +77,48 @@ nonisolated struct LiveCallSmokeTests {
     print("CALLSMOKE group ended for everyone:", ended.state, "canJoin=\(ended.canJoin)")
     #expect(ended.state == .ended)
     #expect(!ended.canJoin)
+  }
+
+  /// Production path with real WebRTC on both sides in one process: does media come up and stay up?
+  @Test("Media: Alice and Bob connect with WebRTC and the call stays active")
+  func mediaCall() async throws {
+    let (alice, aliceUser) = try await client("u_alice", media: .live)
+    let (bob, bobUser) = try await client("u_bob", media: .live)
+    let conversation = try Conversation(
+      id: ConversationID("c2c_u_bob"), kind: .direct, name: "Bob",
+      memberIDs: [aliceUser.id, bobUser.id], updatedAt: .now)
+    let started = try await alice.startVideoCall(in: conversation)
+    #expect(await waitFor(bob, .incoming))
+    _ = try await bob.answer(callID: started.id)
+    var trail: [String] = []
+    for second in 0..<20 {
+      await alice.poll()
+      await bob.poll()
+      let a = await alice.currentCall
+      let b = await bob.currentCall
+      trail.append("t\(second) alice=\(a?.state.label ?? "-")/\(a?.participants.count ?? 0) bob=\(b?.state.label ?? "-")/\(b?.participants.count ?? 0)")
+      try? await Task.sleep(for: .seconds(1))
+    }
+    print("CALLSMOKE media trail:\n" + trail.joined(separator: "\n"))
+    let final = await alice.currentCall
+    #expect(final?.state == .active)
+    #expect(final?.participants.count == 2)
+    _ = try? await alice.end(callID: started.id)
+    await alice.stopMonitoring()
+    await bob.stopMonitoring()
+  }
+}
+
+private nonisolated extension CallState {
+  var label: String {
+    switch self {
+    case .incoming: "incoming"
+    case .ringing: "ringing"
+    case .active: "active"
+    case .reconnecting: "reconnecting"
+    case .declined: "declined"
+    case .missed: "missed"
+    case .ended: "ended"
+    }
   }
 }
