@@ -1,10 +1,35 @@
 import Foundation
+import OSLog
 import SwiftUI
 
 nonisolated struct AppDependencies: Sendable {
   let auth: any AuthClient
   let chat: any ChatClient
   let calls: any CallClient
+
+  /// Real login against the identity service; chat and calls stay mocked until their contracts exist.
+  static func live(
+    configuration: AuthConfiguration, arguments: [String] = ProcessInfo.processInfo.arguments
+  ) -> AppDependencies {
+    let mocked = mock(arguments: arguments)
+    return AppDependencies(
+      auth: LiveAuthClient(configuration: configuration), chat: mocked.chat, calls: mocked.calls)
+  }
+
+  /// Real login by default; `-demo-mock` or `-demo-immediateEvents` (UI tests) selects the full mock.
+  static func launch(arguments: [String] = ProcessInfo.processInfo.arguments) -> AppDependencies {
+    let useMock = arguments.contains("-demo-mock") || arguments.contains("-demo-immediateEvents")
+    guard !useMock else {
+      authLog.notice("auth: using MOCK client")
+      return mock(arguments: arguments)
+    }
+    let configuration = AuthConfiguration()
+    let endpoint = configuration.baseURL.absoluteString
+    authLog.notice(
+      "auth: using LIVE client \(endpoint, privacy: .public) app_id=\(configuration.appID, privacy: .public)"
+    )
+    return live(configuration: configuration)
+  }
 
   static func mock(arguments: [String] = ProcessInfo.processInfo.arguments) -> AppDependencies {
     let scheduler: any DemoScheduler =

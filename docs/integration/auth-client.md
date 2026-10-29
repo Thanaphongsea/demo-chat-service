@@ -10,6 +10,14 @@
 
 There is no auth event stream, refresh method, or token provider in this protocol. `AuthStore` uses revision guards in addition to cancellation; an adapter must not rely on UI guards to prevent stale credential persistence. Never log passwords, credentials, session tokens, or authorization headers.
 
+## Live adapter
+
+`LiveAuthClient` (`Core/Clients/LiveAuthClient.swift`) implements `POST {baseURL}/v1/token` with `{user_id, app_id, password}` and reads `{token, expires_at}`. 401/403 map to `invalidCredentials`; 429, 5xx, and transport failures map to `unavailable`; a malformed 200 maps to `invalidResponse`. The user id comes from the JWT `sub` claim (read unverified, display only). The session carries an `AccessToken` (redacted in logs) and is kept in the Keychain (`KeychainSessionStore`); expired sessions are dropped on read.
+
+It is the default. `AuthConfiguration.dev` holds the dev URL and app id (the quick-tunnel URL changes on restart); override with `-authBaseURL`/`-authAppID`. `-demo-mock` or `-demo-immediateEvents` (all UI tests) selects the full mock. Chat and calls remain mocked, so the mock `user-me` identity still applies to them.
+
+Still open: refresh/revocation endpoints (sign-out is local only), startup session restoration in `AuthStore`, and a token provider for the call adapter.
+
 ## Mock replacement checklist
 
 - [ ] Supply identity service login, refresh, logout/revocation, expiry, error, and session-restoration contracts. No Login endpoint or wire shape has been supplied.

@@ -2,7 +2,7 @@ import SwiftUI
 
 @main
 struct ChatCallApp: App {
-  private let dependencies = AppDependencies.mock()
+  private let dependencies = AppDependencies.launch()
 
   var body: some Scene {
     WindowGroup {

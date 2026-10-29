@@ -26,11 +26,33 @@ nonisolated struct Credentials: Equatable, Sendable {
   let password: String
 }
 
+/// Bearer token for the identity service. Never printed or logged.
+nonisolated struct AccessToken: Equatable, Sendable {
+  let value: String
+  let expiresAt: Date
+}
+
+extension AccessToken: CustomStringConvertible, CustomDebugStringConvertible {
+  var description: String { "AccessToken(<redacted>)" }
+  var debugDescription: String { description }
+}
+
 nonisolated struct Session: Equatable, Sendable {
   let user: User
   let signedInAt: Date
+  /// Nil for mock sessions; always present for a live identity session.
+  let accessToken: AccessToken?
+
+  init(user: User, signedInAt: Date, accessToken: AccessToken? = nil) {
+    self.user = user
+    self.signedInAt = signedInAt
+    self.accessToken = accessToken
+  }
 }
 
 nonisolated enum AuthError: Error, Equatable, Sendable {
   case invalidCredentials
+  /// Network failure, rate limiting, or a server error; the credentials were not rejected.
+  case unavailable
+  case invalidResponse
 }
