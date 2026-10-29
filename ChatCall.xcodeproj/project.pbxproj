@@ -85,6 +85,7 @@
 		D67C249BF8BB960B0BC34246 /* ConversationListFixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE73371421C67CABBD090007 /* ConversationListFixtures.swift */; };
 		D7D1E51B6F0618F2F7C9FD7E /* CallStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 492F6C27BF2A5936BB3C70D7 /* CallStoreTests.swift */; };
 		DAD1A5D0708ED65D197BD1AF /* UnreadBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD3B528F3FD122A5B355532B /* UnreadBadge.swift */; };
+		E00860927E7AB1A61C1338D4 /* CallJoinTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D786377396B3675CCF1794E /* CallJoinTests.swift */; };
 		E09BB426378B36F87B0FE64A /* MockAuthClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C88325AD374FFBE79EC9E3C /* MockAuthClientTests.swift */; };
 		E37A2D2EF2F7BDE2B327D3EA /* LiveAuthClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F65CA0FE75DB4BD095E8D74 /* LiveAuthClientTests.swift */; };
 		E5D992E107863B3409BADFF1 /* CallClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = D71E3DC1B7C005595059D80E /* CallClient.swift */; };
@@ -175,6 +176,7 @@
 		875059E4EBFC39E305CABDC8 /* ChatRoomStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatRoomStore.swift; sourceTree = "<group>"; };
 		8C88325AD374FFBE79EC9E3C /* MockAuthClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAuthClientTests.swift; sourceTree = "<group>"; };
 		8CA8F2FEFD70C5DECE04A2D3 /* CallHistoryRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallHistoryRow.swift; sourceTree = "<group>"; };
+		8D786377396B3675CCF1794E /* CallJoinTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CallJoinTests.swift; sourceTree = "<group>"; };
 		932BC14055B87579E927E7C3 /* MockCallClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockCallClientTests.swift; sourceTree = "<group>"; };
 		95CCEDEF46CD4A28D397F3A3 /* ActiveCallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveCallView.swift; sourceTree = "<group>"; };
 		96E6F2926C0EEA61115CAC77 /* AppRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRootView.swift; sourceTree = "<group>"; };
@@ -369,6 +371,7 @@
 				6C678A5637DF690EDA00F4FF /* LiveStackSmokeTests.swift */,
 				9B4067A2CD124024D63D9634 /* VoIPClientTests.swift */,
 				76DCCC91DAC111452639C3A6 /* CallMapperTests.swift */,
+				8D786377396B3675CCF1794E /* CallJoinTests.swift */,
 			);
 			path = ChatCallTests;
 			sourceTree = "<group>";
@@ -643,6 +646,7 @@
 				CFA4B48569676D5893CBD47D /* LiveStackSmokeTests.swift in Sources */,
 				D1B16176A481E08D266AD42F /* VoIPClientTests.swift in Sources */,
 				0AA945321CA510EF6BD68680 /* CallMapperTests.swift in Sources */,
+				E00860927E7AB1A61C1338D4 /* CallJoinTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

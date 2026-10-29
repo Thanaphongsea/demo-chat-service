@@ -33,9 +33,18 @@ struct CallControlsView: View {
             await store.flipCamera()
           }
         }
-        Button("End call", systemImage: "phone.down.fill") { Task { await store.end() } }
-          .frame(maxWidth: .infinity).buttonStyle(.glassProminent).tint(.red)
-          .accessibilityIdentifier("call.end")
+        Button(call.kind == .group ? "Leave call" : "End call", systemImage: "phone.down.fill") {
+          Task { await store.end() }
+        }
+        .frame(maxWidth: .infinity).buttonStyle(.glassProminent).tint(.red)
+        .accessibilityIdentifier("call.end")
+        if call.kind == .group, call.direction == .outgoing {
+          Button("End for everyone", systemImage: "xmark.circle.fill") {
+            Task { await store.endForEveryone() }
+          }
+          .frame(maxWidth: .infinity).buttonStyle(.glass).tint(.red)
+          .accessibilityIdentifier("call.endAll")
+        }
       }
       .padding(12)
       .glassEffect(in: .rect(cornerRadius: 28))

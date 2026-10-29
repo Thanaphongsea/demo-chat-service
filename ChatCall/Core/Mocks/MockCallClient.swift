@@ -41,6 +41,19 @@ actor MockCallClient: CallClient {
     return commit(replacing(call, state: .ended))
   }
 
+  func join(callID: CallID) async throws -> CallSnapshot {
+    guard currentCall == nil || currentCall?.state.isTerminal == true else {
+      throw CallError.callAlreadyInProgress
+    }
+    guard let index = completed.lastIndex(where: { $0.id == callID && $0.canJoin }) else {
+      throw CallError.invalidTransition
+    }
+    let rejoined = replacing(completed.remove(at: index), state: .active)
+    return commit(rejoined)
+  }
+
+  func endForEveryone(callID: CallID) async throws -> CallSnapshot { try await end(callID: callID) }
+
   func setMicrophoneEnabled(_ enabled: Bool, callID: CallID) async throws -> CallSnapshot {
     let call = try require(callID, states: [.ringing, .active, .reconnecting])
     return commit(replacing(call, microphoneEnabled: enabled))
@@ -66,7 +79,9 @@ actor MockCallClient: CallClient {
   }
 
   func demoMissedCall(kind: CallKind) async throws -> CallSnapshot {
-    try begin(in: demoConversation(kind: kind), direction: .incoming, state: .missed)
+    try begin(
+      in: demoConversation(kind: kind), direction: .incoming, state: .missed,
+      canJoin: kind == .group)
   }
 
   func demoReconnect(callID: CallID) async throws -> CallSnapshot {
@@ -85,7 +100,8 @@ actor MockCallClient: CallClient {
   }
 
   private func begin(
-    in conversation: Conversation, direction: CallDirection, state: CallState
+    in conversation: Conversation, direction: CallDirection, state: CallState,
+    canJoin: Bool = false
   ) throws -> CallSnapshot {
     guard currentCall == nil || currentCall?.state.isTerminal == true else {
       throw CallError.callAlreadyInProgress
@@ -108,7 +124,8 @@ actor MockCallClient: CallClient {
         id: CallID("call-\(sequence)"), conversationID: conversation.id,
         kind: conversation.kind == .direct ? .direct : .group, direction: direction, state: state,
         participants: participants, startedAt: MockSeed.date.addingTimeInterval(Double(sequence)),
-        microphoneEnabled: true, cameraEnabled: true, speakerEnabled: true, cameraPosition: .front))
+        microphoneEnabled: true, cameraEnabled: true, speakerEnabled: true, cameraPosition: .front,
+        canJoin: canJoin))
   }
 
   private func demoConversation(kind: CallKind) throws -> Conversation {

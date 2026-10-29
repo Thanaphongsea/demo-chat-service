@@ -5,25 +5,7 @@ struct CallsListView: View {
 
   var body: some View {
     List {
-      Section {
-        Text("Try a call with your demo contacts. Video and audio are simulated.")
-          .foregroundStyle(.secondary)
-        Button("Incoming direct call", systemImage: "person.crop.circle") {
-          Task { await store.incoming(kind: .direct) }
-        }
-        .accessibilityIdentifier("calls.incoming.direct")
-        Button("Incoming group call", systemImage: "person.3") {
-          Task { await store.incoming(kind: .group) }
-        }
-        .accessibilityIdentifier("calls.incoming.group")
-        Button("Simulate missed call", systemImage: "phone.down") {
-          Task { await store.missed(kind: .direct) }
-        }
-        .accessibilityIdentifier("calls.missed")
-      } header: {
-        Text("Demo calls")
-      }
-      .disabled(store.isBusy)
+      if store.demoEnabled { demoSection }
       Section("Recent calls") {
         if store.history.isEmpty {
           ContentUnavailableView(
@@ -32,7 +14,10 @@ struct CallsListView: View {
           )
           .accessibilityIdentifier("calls.placeholder")
         } else {
-          ForEach(store.history) { CallHistoryRow(call: $0) }
+          ForEach(store.history) { call in
+            CallHistoryRow(call: call, join: call.canJoin ? { Task { await store.join(call) } } : nil)
+              .disabled(store.isBusy)
+          }
         }
       }
       if let error = store.errorMessage {
@@ -40,5 +25,27 @@ struct CallsListView: View {
       }
     }
     .navigationTitle("Calls")
+  }
+
+  private var demoSection: some View {
+    Section {
+      Text("Try a call with your demo contacts. Video and audio are simulated.")
+        .foregroundStyle(.secondary)
+      Button("Incoming direct call", systemImage: "person.crop.circle") {
+        Task { await store.incoming(kind: .direct) }
+      }
+      .accessibilityIdentifier("calls.incoming.direct")
+      Button("Incoming group call", systemImage: "person.3") {
+        Task { await store.incoming(kind: .group) }
+      }
+      .accessibilityIdentifier("calls.incoming.group")
+      Button("Simulate missed call", systemImage: "phone.down") {
+        Task { await store.missed(kind: .direct) }
+      }
+      .accessibilityIdentifier("calls.missed")
+    } header: {
+      Text("Demo calls")
+    }
+    .disabled(store.isBusy)
   }
 }

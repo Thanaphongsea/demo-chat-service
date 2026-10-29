@@ -254,6 +254,10 @@ private actor SuspendedStartCallClient: CallClient {
     try await base.decline(callID: callID)
   }
   func end(callID: CallID) async throws -> CallSnapshot { try await base.end(callID: callID) }
+  func join(callID: CallID) async throws -> CallSnapshot { try await base.join(callID: callID) }
+  func endForEveryone(callID: CallID) async throws -> CallSnapshot {
+    try await base.endForEveryone(callID: callID)
+  }
   func setMicrophoneEnabled(_ enabled: Bool, callID: CallID) async throws -> CallSnapshot {
     try await base.setMicrophoneEnabled(enabled, callID: callID)
   }

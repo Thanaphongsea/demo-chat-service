@@ -17,10 +17,14 @@ final class CallStore {
   @ObservationIgnored private var operationTask: Task<CallSnapshot, any Error>?
   @ObservationIgnored private var revision = 0
   @ObservationIgnored private var retiredIDs: Set<CallID> = []
+  @ObservationIgnored private var rejoinIDs: Set<CallID> = []
+  /// False for a live client: the demo actions on the Calls tab have no real counterpart.
+  let demoEnabled: Bool
 
-  init(client: any CallClient, chatClient: any ChatClient) {
+  init(client: any CallClient, chatClient: any ChatClient, demoEnabled: Bool = true) {
     self.client = client
     self.chatClient = chatClient
+    self.demoEnabled = demoEnabled
   }
 
   func start() async {
@@ -73,6 +77,19 @@ final class CallStore {
     await perform { [client] in try await client.end(callID: call.id) }
   }
 
+  /// Re-enter a group call from the history list; allowed only when the server said `canJoin`.
+  func join(_ target: CallSnapshot) async {
+    guard target.canJoin, call == nil || call?.state.isTerminal == true else { return }
+    rejoinIDs.insert(target.id)
+    await perform { [client] in try await client.join(callID: target.id) }
+    rejoinIDs.remove(target.id)
+  }
+
+  func endForEveryone() async {
+    guard let call, call.kind == .group, call.direction == .outgoing, canControl else { return }
+    await perform { [client] in try await client.endForEveryone(callID: call.id) }
+  }
+
   func toggleMicrophone() async {
     guard let call, canControl else { return }
     await perform { [client] in
@@ -110,7 +127,12 @@ final class CallStore {
   }
 
   func receive(_ event: CallEvent) {
-    guard case .callUpdated(let updated) = event, !retiredIDs.contains(updated.id) else { return }
+    guard case .callUpdated(let updated) = event else { return }
+    if rejoinIDs.contains(updated.id), !updated.state.isTerminal {
+      history.removeAll { $0.id == updated.id }
+      retiredIDs.remove(updated.id)
+    }
+    guard !retiredIDs.contains(updated.id) else { return }
     guard call?.id == updated.id || !history.contains(where: { $0.id == updated.id }) else {
       return
     }
@@ -122,12 +144,14 @@ final class CallStore {
     } else {
       guard call == nil || call?.state.isTerminal == true else { return }
       if let call { retiredIDs.insert(call.id) }
-      page = VideoPage(localUser: MockSeed.currentUser)
+      page = VideoPage(
+        localUser: updated.participants.first { $0.id == updated.localUserID }
+          ?? MockSeed.currentUser)
     }
     call = updated
     page.update(
       participants: updated.participants,
-      audioOnlyIDs: updated.cameraEnabled ? [] : [MockSeed.currentUser.id])
+      audioOnlyIDs: updated.cameraEnabled ? [] : [updated.localUserID])
     if updated.state.isTerminal {
       if !history.contains(where: { $0.id == updated.id }) { history.insert(updated, at: 0) }
     } else {
