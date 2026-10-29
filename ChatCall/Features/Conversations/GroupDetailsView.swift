@@ -8,6 +8,7 @@ struct GroupDetailsView: View {
       Section {
         TextField("Group name", text: $store.groupName)
           .textInputAutocapitalization(.words)
+          .accessibilityLabel("Group name")
           .accessibilityIdentifier("compose.groupName")
           .disabled(store.isCreating)
       } header: {

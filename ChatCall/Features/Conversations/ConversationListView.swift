@@ -29,6 +29,10 @@ struct ConversationListView: View {
               ConversationRow(conversation: conversation)
             }
             .accessibilityIdentifier("conversations.room.\(conversation.id.rawValue)")
+            .accessibilityLabel(
+              "\(conversation.name), \(conversation.kind == .direct ? "Direct" : "Group"), "
+                + (conversation.lastMessage?.text ?? "Start a conversation")
+            )
             .listRowBackground(Color(.secondarySystemGroupedBackground))
           }
           .listStyle(.insetGrouped)

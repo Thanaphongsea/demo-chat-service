@@ -61,7 +61,8 @@ struct ActiveCallView: View {
       Button("Simulate reconnect", systemImage: "wifi.exclamationmark") {
         Task { await store.reconnect() }
       }
-      .font(.caption).disabled(store.isBusy || call.state != .active)
+      .font(.caption).frame(minHeight: 48).contentShape(Rectangle())
+      .disabled(store.isBusy || call.state != .active)
       .accessibilityIdentifier("call.reconnect")
       CallControlsView(call: call, store: store)
     }

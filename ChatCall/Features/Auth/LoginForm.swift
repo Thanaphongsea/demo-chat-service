@@ -20,6 +20,7 @@ struct LoginForm: View {
           .submitLabel(.next)
           .focused($focusedField, equals: .username)
           .onSubmit { focusedField = .password }
+          .accessibilityLabel("Username or email")
           .accessibilityIdentifier("auth.username")
       }
 
@@ -40,6 +41,7 @@ struct LoginForm: View {
           .submitLabel(.go)
           .focused($focusedField, equals: .password)
           .onSubmit(submit)
+          .accessibilityLabel("Password")
           .accessibilityIdentifier("auth.password")
 
           Button {
@@ -49,6 +51,8 @@ struct LoginForm: View {
               .frame(minWidth: 44, minHeight: 44)
           }
           .buttonStyle(.plain)
+          .frame(minWidth: 48, minHeight: 48)
+          .contentShape(Rectangle())
           .accessibilityLabel(passwordIsVisible ? "Hide password" : "Show password")
           .accessibilityIdentifier("auth.togglePassword")
         }
