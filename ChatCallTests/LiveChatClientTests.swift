@@ -371,7 +371,48 @@ nonisolated struct LiveChatClientTests {
       try await missing.createGroup(name: "T", members: [UserID("b"), UserID("c")])
     }
   }
+
+  // MARK: session ending
+
+  @Test("A revoked or unauthorised answer reports the ended session once per failure and still throws")
+  func endedSessionIsReported() async throws {
+    let reports = ReportCounter()
+    let transport = StubTransport(reply: { _ in .gateway(401, json: #"{"ErrorCode":70009}"#) })
+    let gateway = GatewayClient(
+      configuration: GatewayConfiguration(httpBase: URL(string: "https://gw.example.test")!),
+      tokens: StaticTokens(), transport: transport, sleep: { _ in })
+    let client = LiveChatClient(
+      gateway: gateway, currentUser: { Self.me }, onKicked: { await reports.bump() })
+    await #expect(throws: GatewayError.revoked) { try await client.listConversations() }
+    #expect(await reports.value == 1)
+
+    let signedOut = LiveChatClient(
+      gateway: gateway, currentUser: { nil }, onKicked: { await reports.bump() })
+    await #expect(throws: GatewayError.unauthorized) { try await signedOut.messages(in: ConversationID("c2c_bob")) }
+    #expect(await reports.value == 2)
+  }
+
+  @Test("Service failures do not end the session")
+  func serviceFailuresDoNotEndSession() async {
+    let reports = ReportCounter()
+    let transport = StubTransport(reply: { _ in .gateway(json: #"{"ErrorCode":93000,"ErrorInfo":"x"}"#) })
+    let gateway = GatewayClient(
+      configuration: GatewayConfiguration(httpBase: URL(string: "https://gw.example.test")!),
+      tokens: StaticTokens(), transport: transport, sleep: { _ in })
+    let client = LiveChatClient(
+      gateway: gateway, currentUser: { Self.me }, onKicked: { await reports.bump() })
+    await #expect(throws: GatewayError.envelope(code: 93000, info: "x")) {
+      try await client.listConversations()
+    }
+    #expect(await reports.value == 0)
+  }
 }
+
+private actor ReportCounter {
+  private(set) var value = 0
+  func bump() { value += 1 }
+}
+
 
 private nonisolated final class NonceSource: @unchecked Sendable {
   private let lock = NSLock()

@@ -41,9 +41,45 @@ actor LiveChatClient: ChatClient {
     self.onKicked = onKicked
   }
 
-  // MARK: reads
+  // MARK: ChatClient
 
   func listConversations() async throws -> [Conversation] {
+    try await reportingEndedSession { try await self.loadConversations() }
+  }
+
+  func listUsers() async throws -> [User] {
+    try await reportingEndedSession { try await self.loadUsers() }
+  }
+
+  func messages(in conversationID: ConversationID) async throws -> [Message] {
+    try await reportingEndedSession { try await self.loadMessages(in: conversationID) }
+  }
+
+  func send(text: String, to conversationID: ConversationID) async throws -> Message {
+    try await reportingEndedSession { try await self.sendText(text, to: conversationID) }
+  }
+
+  func createDirect(with userID: UserID) async throws -> Conversation {
+    try await reportingEndedSession { try await self.makeDirect(with: userID) }
+  }
+
+  func createGroup(name: String, members: [UserID]) async throws -> Conversation {
+    try await reportingEndedSession { try await self.makeGroup(name: name, members: members) }
+  }
+
+  /// A revoked or unauthorised answer means the session is over: tell the app, then still throw.
+  private func reportingEndedSession<T>(_ body: () async throws -> T) async throws -> T {
+    do {
+      return try await body()
+    } catch let error as GatewayError where error == .revoked || error == .unauthorized {
+      await onKicked()
+      throw error
+    }
+  }
+
+  // MARK: reads
+
+  private func loadConversations() async throws -> [Conversation] {
     let me = try await requireUser()
     let rows = try await conversationRows(me: me)
     let rosters = try await rosters(for: rows)
@@ -58,11 +94,11 @@ actor LiveChatClient: ChatClient {
     }
   }
 
-  func listUsers() async throws -> [User] {
+  private func loadUsers() async throws -> [User] {
     let me = try await requireUser()
     var ids: [UserID] = []
     var seen: Set<UserID> = [me]
-    for conversation in try await listConversations() {
+    for conversation in try await loadConversations() {
       for id in conversation.memberIDs where seen.insert(id).inserted { ids.append(id) }
     }
     let names = try await displayNames(for: ids)
@@ -72,7 +108,7 @@ actor LiveChatClient: ChatClient {
     }
   }
 
-  func messages(in conversationID: ConversationID) async throws -> [Message] {
+  private func loadMessages(in conversationID: ConversationID) async throws -> [Message] {
     let me = try await requireUser()
     let wire: [WireMessage]
     switch Self.target(of: conversationID) {
@@ -100,7 +136,7 @@ actor LiveChatClient: ChatClient {
 
   /// Every call mints a fresh nonce and is never retried here: if the answer is lost after the server
   /// accepted the message, sending again duplicates it (the contract has no client request id yet).
-  func send(text: String, to conversationID: ConversationID) async throws -> Message {
+  private func sendText(_ text: String, to conversationID: ConversationID) async throws -> Message {
     let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
     guard !trimmed.isEmpty else { throw ChatError.emptyMessage }
     guard let target = Self.target(of: conversationID) else { throw ChatError.conversationNotFound }
@@ -131,7 +167,7 @@ actor LiveChatClient: ChatClient {
   }
 
   /// A direct conversation exists once the first message is sent, so this makes no request.
-  func createDirect(with userID: UserID) async throws -> Conversation {
+  private func makeDirect(with userID: UserID) async throws -> Conversation {
     let me = try await requireUser()
     let peer = userID.rawValue.trimmingCharacters(in: .whitespacesAndNewlines)
     guard !peer.isEmpty else { throw ChatError.userNotFound }
@@ -141,7 +177,7 @@ actor LiveChatClient: ChatClient {
       memberIDs: [me, UserID(peer)], updatedAt: now())
   }
 
-  func createGroup(name: String, members: [UserID]) async throws -> Conversation {
+  private func makeGroup(name: String, members: [UserID]) async throws -> Conversation {
     let title = name.trimmingCharacters(in: .whitespacesAndNewlines)
     guard !title.isEmpty else { throw ChatError.groupNameRequired }
     let me = try await requireUser()
@@ -302,7 +338,7 @@ actor LiveChatClient: ChatClient {
       return []
     case .reconnected:
       // Events published while the socket was down are gone; re-read the list as updates.
-      guard let conversations = try? await listConversations() else { return [] }
+      guard let conversations = try? await loadConversations() else { return [] }
       return conversations.map { .conversationUpdated($0) }
     case .unknown:
       return []

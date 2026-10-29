@@ -2,18 +2,67 @@ import Foundation
 import OSLog
 import SwiftUI
 
+/// Fires when the server ended the session (kicked, revoked or unauthorised) so the app can return to Login.
+nonisolated final class SessionEndedSignal: @unchecked Sendable {
+  private let lock = NSLock()
+  private var continuations: [UUID: AsyncStream<Void>.Continuation] = [:]
+
+  func stream() -> AsyncStream<Void> {
+    let (stream, continuation) = AsyncStream<Void>.makeStream()
+    let id = UUID()
+    lock.withLock { continuations[id] = continuation }
+    continuation.onTermination = { [weak self] _ in
+      self?.lock.withLock { _ = self?.continuations.removeValue(forKey: id) }
+    }
+    return stream
+  }
+
+  func fire() {
+    let targets = lock.withLock { Array(continuations.values) }
+    for continuation in targets { continuation.yield() }
+  }
+}
+
 nonisolated struct AppDependencies: Sendable {
   let auth: any AuthClient
   let chat: any ChatClient
   let calls: any CallClient
+  let sessionEnded: SessionEndedSignal
+  /// Stops background work that outlives a screen, e.g. the realtime socket, on sign-out.
+  let stopBackgroundWork: @Sendable () async -> Void
 
-  /// Real login against the identity service; chat and calls stay mocked until their contracts exist.
+  init(
+    auth: any AuthClient, chat: any ChatClient, calls: any CallClient,
+    sessionEnded: SessionEndedSignal = SessionEndedSignal(),
+    stopBackgroundWork: @escaping @Sendable () async -> Void = {}
+  ) {
+    self.auth = auth
+    self.chat = chat
+    self.calls = calls
+    self.sessionEnded = sessionEnded
+    self.stopBackgroundWork = stopBackgroundWork
+  }
+
+  /// Real login and chat against the gateway; calls stay mocked until the VoIP client lands.
   static func live(
-    configuration: AuthConfiguration, arguments: [String] = ProcessInfo.processInfo.arguments
+    configuration: AuthConfiguration, gateway: GatewayConfiguration = GatewayConfiguration(),
+    arguments: [String] = ProcessInfo.processInfo.arguments
   ) -> AppDependencies {
     let mocked = mock(arguments: arguments)
+    let auth = LiveAuthClient(configuration: configuration)
+    let signal = SessionEndedSignal()
+    let chat = LiveChatClient(
+      gateway: GatewayClient(configuration: gateway, tokens: auth),
+      currentUser: { await auth.currentSession?.user.id },
+      realtime: CentrifugoRealtime(configuration: gateway, tokens: auth),
+      deviceID: DeviceIdentifier.current(),
+      onKicked: {
+        await auth.signOut()
+        signal.fire()
+      })
     return AppDependencies(
-      auth: LiveAuthClient(configuration: configuration), chat: mocked.chat, calls: mocked.calls)
+      auth: auth, chat: chat, calls: mocked.calls, sessionEnded: signal,
+      stopBackgroundWork: { await chat.stopRealtime() })
   }
 
   /// Real login by default; `-demo-mock` or `-demo-immediateEvents` (UI tests) selects the full mock.

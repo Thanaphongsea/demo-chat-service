@@ -71,6 +71,12 @@ final class AuthStore {
     if attempt == revision { signInTask = nil }
   }
 
+  /// The server ended the session; return to Login unless the user is not signed in anyway.
+  func sessionEnded() async {
+    guard case .authenticated = state else { return }
+    await signOut()
+  }
+
   func signOut() async {
     guard state != .signingOut else { return }
     revision += 1
