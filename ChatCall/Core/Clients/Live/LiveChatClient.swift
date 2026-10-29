@@ -10,13 +10,24 @@ actor LiveChatClient: ChatClient {
   private static let maxRosterPages = 20
   private static let portraitBatch = 100
 
+  /// The contract accepts at most 50 listed members when a group is created.
+  private static let maxNewGroupMembers = 50
+
   private let gateway: GatewayClient
   private let currentUser: @Sendable () async -> UserID?
+  private let nonce: @Sendable () -> UInt32
+  private let now: @Sendable () -> Date
 
   /// `currentUser` is asked on every operation, so an account switch or sign-out takes effect at once.
-  init(gateway: GatewayClient, currentUser: @escaping @Sendable () async -> UserID?) {
+  init(
+    gateway: GatewayClient, currentUser: @escaping @Sendable () async -> UserID?,
+    nonce: @escaping @Sendable () -> UInt32 = { UInt32.random(in: 1...UInt32.max) },
+    now: @escaping @Sendable () -> Date = { Date() }
+  ) {
     self.gateway = gateway
     self.currentUser = currentUser
+    self.nonce = nonce
+    self.now = now
   }
 
   // MARK: reads
@@ -71,18 +82,67 @@ actor LiveChatClient: ChatClient {
       .sorted { $0.sentAt != $1.sentAt ? $0.sentAt < $1.sentAt : $0.id.rawValue < $1.id.rawValue }
   }
 
-  // MARK: writes (Task 5) and events (Task 6)
+  // MARK: writes and events
 
+  /// Every call mints a fresh nonce and is never retried here: if the answer is lost after the server
+  /// accepted the message, sending again duplicates it (the contract has no client request id yet).
   func send(text: String, to conversationID: ConversationID) async throws -> Message {
-    throw ChatError.conversationNotFound
+    let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+    guard !trimmed.isEmpty else { throw ChatError.emptyMessage }
+    guard let target = Self.target(of: conversationID) else { throw ChatError.conversationNotFound }
+    let me = try await requireUser()
+    let random = Int(nonce())
+    let clientID = UUID().uuidString.lowercased()
+    let body = [OutgoingTextElement(text: trimmed)]
+    let reply: SendResponse
+    switch target {
+    case .direct(let peer):
+      reply = try await gateway.post(
+        "openim/sendmsg",
+        body: SendDirectRequest(
+          from: me.rawValue, to: peer, random: random, id: clientID, body: body))
+    case .group(let group):
+      reply = try await gateway.post(
+        "group_open_http_svc/send_group_msg",
+        body: SendGroupRequest(
+          from: me.rawValue, groupID: group, random: random, id: clientID, body: body))
+    }
+    guard let key = [reply.key, reply.id].lazy.compactMap({ $0 }).first(where: { !$0.isEmpty })
+    else { throw GatewayError.invalidResponse }
+    return Message(
+      id: MessageID(key), conversationID: conversationID, senderID: me, text: trimmed,
+      sentAt: reply.time.map { Date(timeIntervalSince1970: $0) } ?? now(), deliveryState: .sent)
   }
 
+  /// A direct conversation exists once the first message is sent, so this makes no request.
   func createDirect(with userID: UserID) async throws -> Conversation {
-    throw ChatError.userNotFound
+    let me = try await requireUser()
+    let peer = userID.rawValue.trimmingCharacters(in: .whitespacesAndNewlines)
+    guard !peer.isEmpty else { throw ChatError.userNotFound }
+    guard peer != me.rawValue else { throw ChatError.invalidMembers }
+    return try Conversation(
+      id: ConversationID("c2c_\(peer)"), kind: .direct, name: peer,
+      memberIDs: [me, UserID(peer)], updatedAt: now())
   }
 
   func createGroup(name: String, members: [UserID]) async throws -> Conversation {
-    throw ChatError.invalidMembers
+    let title = name.trimmingCharacters(in: .whitespacesAndNewlines)
+    guard !title.isEmpty else { throw ChatError.groupNameRequired }
+    let me = try await requireUser()
+    var seen: Set<UserID> = [me]
+    let others = members.filter { seen.insert($0).inserted }
+    guard others.count >= 2, others.count <= Self.maxNewGroupMembers else {
+      throw ChatError.invalidMembers
+    }
+    let reply: CreateGroupResponse = try await gateway.post(
+      "group_open_http_svc/create_group",
+      body: CreateGroupRequest(
+        owner: me.rawValue, name: title,
+        members: others.map { CreateGroupRequest.Member(account: $0.rawValue) }))
+    guard let group = reply.groupID, !group.isEmpty else { throw GatewayError.invalidResponse }
+    return try Conversation(
+      id: ConversationID("group_\(group)"), kind: .group, name: title, memberIDs: [me] + others,
+      updatedAt: now())
   }
 
   func events() async -> AsyncStream<ChatEvent> {

@@ -179,3 +179,69 @@ nonisolated struct PortraitResponse: Decodable, Sendable {
   let items: [Item]?
   private enum CodingKeys: String, CodingKey { case items = "UserProfileItem" }
 }
+
+// MARK: write requests and responses
+
+nonisolated struct OutgoingTextElement: Encodable, Sendable {
+  let text: String
+  private enum CodingKeys: String, CodingKey { case type = "MsgType", content = "MsgContent" }
+  private enum ContentKeys: String, CodingKey { case text = "Text" }
+  func encode(to encoder: any Encoder) throws {
+    var values = encoder.container(keyedBy: CodingKeys.self)
+    try values.encode("TIMTextElem", forKey: .type)
+    var content = values.nestedContainer(keyedBy: ContentKeys.self, forKey: .content)
+    try content.encode(text, forKey: .text)
+  }
+}
+
+nonisolated struct SendDirectRequest: Encodable, Sendable {
+  let from: String
+  let to: String
+  let random: Int
+  let id: String
+  let body: [OutgoingTextElement]
+  private enum CodingKeys: String, CodingKey {
+    case from = "From_Account", to = "To_Account", random = "MsgRandom", id = "MsgId"
+    case body = "MsgBody"
+  }
+}
+
+nonisolated struct SendGroupRequest: Encodable, Sendable {
+  let from: String
+  let groupID: String
+  /// The group endpoint spells its nonce `Random`, not `MsgRandom`.
+  let random: Int
+  let id: String
+  let body: [OutgoingTextElement]
+  private enum CodingKeys: String, CodingKey {
+    case from = "From_Account", groupID = "GroupId", random = "Random", id = "MsgId"
+    case body = "MsgBody"
+  }
+}
+
+nonisolated struct SendResponse: Decodable, Sendable {
+  let key: String?
+  let id: String?
+  /// Unix seconds.
+  let time: Double?
+  private enum CodingKeys: String, CodingKey { case key = "MsgKey", id = "MsgId", time = "MsgTime" }
+}
+
+nonisolated struct CreateGroupRequest: Encodable, Sendable {
+  struct Member: Encodable, Sendable {
+    let account: String
+    private enum CodingKeys: String, CodingKey { case account = "Member_Account" }
+  }
+  let owner: String
+  let type = "Public"
+  let name: String
+  let members: [Member]
+  private enum CodingKeys: String, CodingKey {
+    case owner = "Owner_Account", type = "Type", name = "Name", members = "MemberList"
+  }
+}
+
+nonisolated struct CreateGroupResponse: Decodable, Sendable {
+  let groupID: String?
+  private enum CodingKeys: String, CodingKey { case groupID = "GroupId" }
+}

@@ -232,4 +232,150 @@ nonisolated struct LiveChatClientTests {
     }
     #expect(try await client.listUsers().map(\.displayName) == ["bob"])
   }
+
+  // MARK: writes
+
+  private func writer(
+    nonces: [UInt32] = [7, 8], _ handler: @escaping @Sendable (String, [String: Any]) async throws -> String
+  ) -> (LiveChatClient, StubTransport) {
+    let (_, transport) = Self.harness(handler)
+    let gateway = GatewayClient(
+      configuration: GatewayConfiguration(httpBase: URL(string: "https://gw.example.test")!),
+      tokens: StaticTokens(), transport: transport, sleep: { _ in })
+    let counter = NonceSource(nonces)
+    return (
+      LiveChatClient(
+        gateway: gateway, currentUser: { Self.me }, nonce: { counter.next() },
+        now: { Date(timeIntervalSince1970: 1_800_000_000) }), transport
+    )
+  }
+
+  @Test("A direct send posts sendmsg with a trimmed text element and returns the server key")
+  func sendDirect() async throws {
+    let (client, transport) = writer { _, _ in
+      #"{"ErrorCode":0,"MsgKey":"srv-1","MsgId":"echo","MsgTime":1800000005}"#
+    }
+    let sent = try await client.send(text: "  hello  ", to: ConversationID("c2c_bob"))
+    #expect(sent.id == MessageID("srv-1"))
+    #expect(sent.text == "hello")
+    #expect(sent.senderID == Self.me)
+    #expect(sent.deliveryState == .sent)
+    #expect(sent.sentAt == Date(timeIntervalSince1970: 1_800_000_005))
+    let request = try #require(Self.bodies(transport, "openim/sendmsg").first)
+    #expect(request["From_Account"] as? String == "alice")
+    #expect(request["To_Account"] as? String == "bob")
+    #expect(request["MsgRandom"] as? Int == 7)
+    #expect((request["MsgId"] as? String)?.isEmpty == false)
+    let body = try #require(request["MsgBody"] as? [[String: Any]])
+    #expect(body.count == 1)
+    #expect(body[0]["MsgType"] as? String == "TIMTextElem")
+    #expect((body[0]["MsgContent"] as? [String: String]) == ["Text": "hello"])
+  }
+
+  @Test("A group send uses send_group_msg and spells the nonce Random")
+  func sendGroup() async throws {
+    let (client, transport) = writer { _, _ in #"{"ErrorCode":0,"MsgKey":"g-1","MsgTime":1800000006}"# }
+    let sent = try await client.send(text: "yo", to: ConversationID("group_g1"))
+    #expect(sent.id == MessageID("g-1"))
+    let request = try #require(Self.bodies(transport, "group_open_http_svc/send_group_msg").first)
+    #expect(request["GroupId"] as? String == "g1")
+    #expect(request["Random"] as? Int == 7)
+    #expect(request["MsgRandom"] == nil)
+    #expect(request["To_Account"] == nil)
+  }
+
+  @Test("Blank text, unknown conversations and missing keys never succeed; blank makes no request")
+  func sendRejections() async throws {
+    let (client, transport) = writer { _, _ in #"{"ErrorCode":0}"# }
+    await #expect(throws: ChatError.emptyMessage) {
+      try await client.send(text: " \n ", to: ConversationID("c2c_bob"))
+    }
+    await #expect(throws: ChatError.conversationNotFound) {
+      try await client.send(text: "x", to: ConversationID("nonsense"))
+    }
+    #expect(transport.requests.isEmpty)
+    await #expect(throws: GatewayError.invalidResponse) {
+      try await client.send(text: "x", to: ConversationID("c2c_bob"))
+    }
+  }
+
+  @Test("Each send mints a new nonce; nothing is retried by the client")
+  func sendUsesFreshNonce() async throws {
+    let (client, transport) = writer(nonces: [11, 12]) { _, _ in
+      #"{"ErrorCode":0,"MsgKey":"k","MsgTime":1800000000}"#
+    }
+    _ = try await client.send(text: "a", to: ConversationID("c2c_bob"))
+    _ = try await client.send(text: "a", to: ConversationID("c2c_bob"))
+    let nonces = Self.bodies(transport, "openim/sendmsg").compactMap { $0["MsgRandom"] as? Int }
+    #expect(nonces == [11, 12])
+  }
+
+  @Test("A failed send surfaces the error and a signed-out user cannot send")
+  func sendFailures() async throws {
+    let (client, _) = writer { _, _ in #"{"ErrorCode":93000,"ErrorInfo":"bad"}"# }
+    await #expect(throws: GatewayError.envelope(code: 93000, info: "bad")) {
+      try await client.send(text: "x", to: ConversationID("c2c_bob"))
+    }
+    let (signedOut, transport) = Self.harness(user: nil) { _, _ in "{}" }
+    await #expect(throws: GatewayError.unauthorized) {
+      try await signedOut.send(text: "x", to: ConversationID("c2c_bob"))
+    }
+    #expect(transport.requests.isEmpty)
+  }
+
+  @Test("Creating a direct conversation makes no request and rejects self and blank users")
+  func createDirect() async throws {
+    let (client, transport) = writer { _, _ in "{}" }
+    let conversation = try await client.createDirect(with: UserID("bob"))
+    #expect(conversation.id == ConversationID("c2c_bob"))
+    #expect(conversation.kind == .direct)
+    #expect(conversation.memberIDs == [Self.me, UserID("bob")])
+    #expect(conversation.lastMessage == nil)
+    await #expect(throws: ChatError.invalidMembers) { try await client.createDirect(with: Self.me) }
+    await #expect(throws: ChatError.userNotFound) { try await client.createDirect(with: UserID("  ")) }
+    #expect(transport.requests.isEmpty)
+  }
+
+  @Test("Creating a group posts create_group with the other members and returns the server id")
+  func createGroup() async throws {
+    let (client, transport) = writer { _, _ in #"{"ErrorCode":0,"GroupId":"g42"}"# }
+    let group = try await client.createGroup(
+      name: "  Team  ", members: [UserID("bob"), UserID("alice"), UserID("bob"), UserID("carol")])
+    #expect(group.id == ConversationID("group_g42"))
+    #expect(group.name == "Team")
+    #expect(group.memberIDs == [Self.me, UserID("bob"), UserID("carol")])
+    let request = try #require(Self.bodies(transport, "group_open_http_svc/create_group").first)
+    #expect(request["Owner_Account"] as? String == "alice")
+    #expect(request["Type"] as? String == "Public")
+    #expect(request["Name"] as? String == "Team")
+    let list = try #require(request["MemberList"] as? [[String: String]])
+    #expect(list == [["Member_Account": "bob"], ["Member_Account": "carol"]])
+  }
+
+  @Test("Group creation validates the name and member count before any request")
+  func createGroupValidation() async throws {
+    let (client, transport) = writer { _, _ in #"{"ErrorCode":0,"GroupId":"g"}"# }
+    await #expect(throws: ChatError.groupNameRequired) {
+      try await client.createGroup(name: "  ", members: [UserID("b"), UserID("c")])
+    }
+    await #expect(throws: ChatError.invalidMembers) {
+      try await client.createGroup(name: "T", members: [UserID("b"), Self.me])
+    }
+    let tooMany = (0..<51).map { UserID("u\($0)") }
+    await #expect(throws: ChatError.invalidMembers) {
+      try await client.createGroup(name: "T", members: tooMany)
+    }
+    #expect(transport.requests.isEmpty)
+    let (missing, _) = writer { _, _ in #"{"ErrorCode":0}"# }
+    await #expect(throws: GatewayError.invalidResponse) {
+      try await missing.createGroup(name: "T", members: [UserID("b"), UserID("c")])
+    }
+  }
+}
+
+private nonisolated final class NonceSource: @unchecked Sendable {
+  private let lock = NSLock()
+  private var values: [UInt32]
+  init(_ values: [UInt32]) { self.values = values }
+  func next() -> UInt32 { lock.withLock { values.count > 1 ? values.removeFirst() : (values.first ?? 1) } }
 }
