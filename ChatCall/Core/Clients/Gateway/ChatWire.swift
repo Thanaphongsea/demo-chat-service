@@ -39,12 +39,14 @@ nonisolated struct WireMessage: Decodable, Sendable, Equatable {
   let flagBits: Int?
   /// C2C, own messages only: 1 once the peer has read it.
   let peerRead: Int?
+  /// Present on realtime deliveries only: the viewer-relative conversation the message belongs to.
+  let conversationID: String?
 
   private enum CodingKeys: String, CodingKey {
     case key = "MsgKey", id = "MsgId", from = "From_Account", to = "To_Account"
     case groupID = "GroupId", seq = "MsgSeq", random = "MsgRandom", timestamp = "MsgTimeStamp"
     case body = "MsgBody", placeFlag = "IsPlaceMsg", flagBits = "MsgFlagBits"
-    case peerRead = "IsPeerRead"
+    case peerRead = "IsPeerRead", conversationID = "ConversationID"
   }
 }
 

@@ -20,6 +20,15 @@ nonisolated enum ChatMapper {
     return nil
   }
 
+  /// The conversation a realtime message belongs to: the payload's own id, else derived from its addressing.
+  static func conversationID(of wire: WireMessage, me: UserID) -> ConversationID? {
+    if let id = wire.conversationID, !id.isEmpty { return ConversationID(id) }
+    if let group = wire.groupID, !group.isEmpty { return ConversationID("group_\(group)") }
+    let peer = wire.from == me.rawValue ? wire.to : wire.from
+    guard let peer, !peer.isEmpty else { return nil }
+    return ConversationID("c2c_\(peer)")
+  }
+
   static func message(_ wire: WireMessage, in conversation: ConversationID, me: UserID) -> Message? {
     guard let id = identity(of: wire) else { return nil }
     let sender = UserID(wire.from ?? "")

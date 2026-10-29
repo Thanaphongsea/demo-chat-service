@@ -17,17 +17,28 @@ actor LiveChatClient: ChatClient {
   private let currentUser: @Sendable () async -> UserID?
   private let nonce: @Sendable () -> UInt32
   private let now: @Sendable () -> Date
+  private let realtime: (any RealtimeConnection)?
+  private let deviceID: String?
+  private let onKicked: @Sendable () async -> Void
+  /// Own messages still `.sent`, per conversation, so a read receipt can mark them delivered.
+  private var unreadOwn: [ConversationID: [(id: MessageID, sentAt: Date)]] = [:]
+  private var rosterCache: [String: [UserID]] = [:]
 
   /// `currentUser` is asked on every operation, so an account switch or sign-out takes effect at once.
   init(
     gateway: GatewayClient, currentUser: @escaping @Sendable () async -> UserID?,
     nonce: @escaping @Sendable () -> UInt32 = { UInt32.random(in: 1...UInt32.max) },
-    now: @escaping @Sendable () -> Date = { Date() }
+    now: @escaping @Sendable () -> Date = { Date() },
+    realtime: (any RealtimeConnection)? = nil, deviceID: String? = nil,
+    onKicked: @escaping @Sendable () async -> Void = {}
   ) {
     self.gateway = gateway
     self.currentUser = currentUser
     self.nonce = nonce
     self.now = now
+    self.realtime = realtime
+    self.deviceID = deviceID
+    self.onKicked = onKicked
   }
 
   // MARK: reads
@@ -36,6 +47,7 @@ actor LiveChatClient: ChatClient {
     let me = try await requireUser()
     let rows = try await conversationRows(me: me)
     let rosters = try await rosters(for: rows)
+    rosterCache.merge(rosters) { _, fresh in fresh }
     var seen: Set<ConversationID> = []
     let conversations = rows.compactMap { row -> Conversation? in
       guard let id = ChatMapper.conversationID(row), seen.insert(id).inserted else { return nil }
@@ -77,9 +89,11 @@ actor LiveChatClient: ChatClient {
       throw ChatError.conversationNotFound
     }
     var seen: Set<MessageID> = []
-    return wire.compactMap { ChatMapper.message($0, in: conversationID, me: me) }
+    let loaded = wire.compactMap { ChatMapper.message($0, in: conversationID, me: me) }
       .filter { seen.insert($0.id).inserted }
       .sorted { $0.sentAt != $1.sentAt ? $0.sentAt < $1.sentAt : $0.id.rawValue < $1.id.rawValue }
+    for message in loaded { rememberUnread(message) }
+    return loaded
   }
 
   // MARK: writes and events
@@ -109,9 +123,11 @@ actor LiveChatClient: ChatClient {
     }
     guard let key = [reply.key, reply.id].lazy.compactMap({ $0 }).first(where: { !$0.isEmpty })
     else { throw GatewayError.invalidResponse }
-    return Message(
+    let message = Message(
       id: MessageID(key), conversationID: conversationID, senderID: me, text: trimmed,
       sentAt: reply.time.map { Date(timeIntervalSince1970: $0) } ?? now(), deliveryState: .sent)
+    rememberUnread(message)
+    return message
   }
 
   /// A direct conversation exists once the first message is sent, so this makes no request.
@@ -146,7 +162,25 @@ actor LiveChatClient: ChatClient {
   }
 
   func events() async -> AsyncStream<ChatEvent> {
-    AsyncStream { $0.finish() }
+    guard let realtime else { return AsyncStream { $0.finish() } }
+    let upstream = realtime.events()
+    await realtime.start()
+    let (stream, continuation) = AsyncStream<ChatEvent>.makeStream()
+    let task = Task {
+      for await event in upstream {
+        for translated in await self.translate(event) { continuation.yield(translated) }
+      }
+      continuation.finish()
+    }
+    continuation.onTermination = { _ in task.cancel() }
+    return stream
+  }
+
+  /// Stops the shared socket, e.g. on sign-out.
+  func stopRealtime() async {
+    await realtime?.stop()
+    unreadOwn = [:]
+    rosterCache = [:]
   }
 
   // MARK: helpers
@@ -236,5 +270,65 @@ actor LiveChatClient: ChatClient {
       }
     }
     return names
+  }
+
+  // MARK: realtime translation
+
+  private func translate(_ event: RealtimeEvent) async -> [ChatEvent] {
+    guard let me = await currentUser() else { return [] }
+    switch event {
+    case .newMessage(let wire):
+      guard let id = ChatMapper.conversationID(of: wire, me: me),
+        let message = ChatMapper.message(wire, in: id, me: me)
+      else { return [] }
+      rememberUnread(message)
+      return [.messageInserted(message)]
+    case .conversationChanged(let wire):
+      guard let conversation = await conversation(from: wire, me: me) else { return [] }
+      return [.conversationUpdated(conversation)]
+    case .readReceipt(let id, let readAt):
+      let conversationID = ConversationID(id)
+      let (read, waiting) = (unreadOwn[conversationID] ?? []).reduce(into: ([MessageID](), [(id: MessageID, sentAt: Date)]())) {
+        $1.sentAt <= readAt ? $0.0.append($1.id) : $0.1.append($1)
+      }
+      unreadOwn[conversationID] = waiting
+      return read.map {
+        .deliveryChanged(messageID: $0, conversationID: conversationID, state: .delivered)
+      }
+    case .kicked(let device):
+      // A kick names a device only when it targets one; no device means the whole account.
+      guard device == nil || deviceID == nil || device == deviceID else { return [] }
+      await onKicked()
+      return []
+    case .reconnected:
+      // Events published while the socket was down are gone; re-read the list as updates.
+      guard let conversations = try? await listConversations() else { return [] }
+      return conversations.map { .conversationUpdated($0) }
+    case .unknown:
+      return []
+    }
+  }
+
+  /// Group rows need a complete roster: use the cached one, fetch it once, else skip the event.
+  private func conversation(from wire: WireConversation, me: UserID) async -> Conversation? {
+    guard let group = wire.groupID, !group.isEmpty else {
+      return ChatMapper.conversation(wire, me: me, members: nil)
+    }
+    if rosterCache[group] == nil {
+      guard let fetched = try? await roster(of: group) else {
+        chatLog.notice("conversation event dropped: roster unavailable")
+        return nil
+      }
+      rosterCache[group] = fetched
+    }
+    return ChatMapper.conversation(wire, me: me, members: rosterCache[group])
+  }
+
+  private func rememberUnread(_ message: Message) {
+    guard message.deliveryState == .sent else { return }
+    var list = unreadOwn[message.conversationID] ?? []
+    guard !list.contains(where: { $0.id == message.id }) else { return }
+    list.append((message.id, message.sentAt))
+    unreadOwn[message.conversationID] = Array(list.suffix(200))
   }
 }
