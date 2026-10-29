@@ -78,6 +78,7 @@
 		A8C6F3FAC7C8B501CCFE8CB2 /* LiveCallMonitoringTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8F95252518562DB1EF53BBA /* LiveCallMonitoringTests.swift */; };
 		AB3BEC7105C1E2DE9ACAB4C3 /* VideoPageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35B0279E3A33B33AE7B2455B /* VideoPageTests.swift */; };
 		AD64D2627DFF12D819D02F74 /* AppRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FBF1019B419DD1D616755B3 /* AppRouter.swift */; };
+		AEFB68E602DE5529BCAB1569 /* LiveCallMediaTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AA127C3F4D408C2812F2C5E /* LiveCallMediaTests.swift */; };
 		B08194FDBEE39575DCAB1078 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = C80A3A6C9ECB564D4C00FE1A /* AppTheme.swift */; };
 		B14FA3410892E42CA8CA4A3E /* SemanticAccessibilityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F600B3C794385447DDCD0F41 /* SemanticAccessibilityTests.swift */; };
 		B26F31A06823EFB451D2CE87 /* MediaFakes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 608E7BA7E8DDE931E57AD525 /* MediaFakes.swift */; };
@@ -169,6 +170,7 @@
 		4155860E4BF27F2BE27019D1 /* MessageBubble.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageBubble.swift; sourceTree = "<group>"; };
 		47C63BCE5FCE4B5F61F85585 /* CallModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallModels.swift; sourceTree = "<group>"; };
 		492F6C27BF2A5936BB3C70D7 /* CallStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallStoreTests.swift; sourceTree = "<group>"; };
+		4AA127C3F4D408C2812F2C5E /* LiveCallMediaTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LiveCallMediaTests.swift; sourceTree = "<group>"; };
 		4CAF3092825321F5E2001D30 /* ConversationRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationRow.swift; sourceTree = "<group>"; };
 		4E00BA2E6DE0B51EBE0444AC /* ChatModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatModels.swift; sourceTree = "<group>"; };
 		4FABCF766BC4BF9646488ACD /* AuthModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthModels.swift; sourceTree = "<group>"; };
@@ -421,6 +423,7 @@
 				E8F95252518562DB1EF53BBA /* LiveCallMonitoringTests.swift */,
 				F1059186393E5F5C6117C777 /* SignalMessageTests.swift */,
 				9DEC98B462B64506D926A1D7 /* MediaSessionTests.swift */,
+				4AA127C3F4D408C2812F2C5E /* LiveCallMediaTests.swift */,
 			);
 			path = ChatCallTests;
 			sourceTree = "<group>";
@@ -704,6 +707,7 @@
 				0A58796E52208CE1BAB18928 /* SignalMessageTests.swift in Sources */,
 				B26F31A06823EFB451D2CE87 /* MediaFakes.swift in Sources */,
 				180947C6C4E56D2F57AC03E5 /* MediaSessionTests.swift in Sources */,
+				AEFB68E602DE5529BCAB1569 /* LiveCallMediaTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

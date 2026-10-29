@@ -47,13 +47,13 @@ struct ActiveCallView: View {
       }
       if store.page.pageCount > 1 {
         HStack {
-          Button("Previous", systemImage: "chevron.left") { store.page.previous() }
+          Button("Previous", systemImage: "chevron.left") { store.previousPage() }
             .disabled(store.page.index == 0).accessibilityIdentifier("call.previous")
           Spacer()
           Text("Page \(store.page.index + 1) of \(store.page.pageCount)")
             .font(.caption).accessibilityIdentifier("call.page")
           Spacer()
-          Button("Next", systemImage: "chevron.right") { store.page.next() }
+          Button("Next", systemImage: "chevron.right") { store.nextPage() }
             .disabled(store.page.index + 1 == store.page.pageCount).accessibilityIdentifier(
               "call.next")
         }.buttonStyle(.borderless)

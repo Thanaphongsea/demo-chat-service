@@ -54,6 +54,8 @@ actor MockCallClient: CallClient {
 
   func endForEveryone(callID: CallID) async throws -> CallSnapshot { try await end(callID: callID) }
 
+  func setVisibleVideoPeers(_ users: [UserID], callID: CallID) async {}
+
   func setMicrophoneEnabled(_ enabled: Bool, callID: CallID) async throws -> CallSnapshot {
     let call = try require(callID, states: [.ringing, .active, .reconnecting])
     return commit(replacing(call, microphoneEnabled: enabled))

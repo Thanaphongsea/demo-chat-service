@@ -1,5 +1,29 @@
 import Foundation
 
+/// How a live call gets its audio and video. Nil means signalling only (no media).
+nonisolated struct MediaDependencies: Sendable {
+  let makePeer: @Sendable (UserID) -> any MediaPeer
+  let makeTransport: @Sendable () -> any SignalingTransport
+  let sleep: @Sendable (Duration) async -> Void
+  let retryDelays: [Duration]
+
+  init(
+    makePeer: @escaping @Sendable (UserID) -> any MediaPeer,
+    makeTransport: @escaping @Sendable () -> any SignalingTransport,
+    sleep: @escaping @Sendable (Duration) async -> Void = { try? await Task.sleep(for: $0) },
+    retryDelays: [Duration] = [.seconds(1), .seconds(2), .seconds(3)]
+  ) {
+    self.makePeer = makePeer
+    self.makeTransport = makeTransport
+    self.sleep = sleep
+    self.retryDelays = retryDelays
+  }
+
+  /// WebRTC over an authenticated URLSession WebSocket.
+  static let live = MediaDependencies(
+    makePeer: { WebRTCPeer(userID: $0) }, makeTransport: { URLSessionSignalingTransport() })
+}
+
 /// Calls over the VoIP REST API: create, answer, decline, join, leave and end, plus polling for incoming
 /// and joinable calls and a heartbeat for the viewer's lease. No audio or video yet.
 actor LiveCallClient: CallClient {
@@ -13,6 +37,7 @@ actor LiveCallClient: CallClient {
   private let pollInterval: Duration
   private let heartbeatInterval: TimeInterval
   private let onSessionEnded: @Sendable () async -> Void
+  private let media: MediaDependencies?
 
   private var current: CallSnapshot?
   private var completed: [CallSnapshot] = []
@@ -24,6 +49,12 @@ actor LiveCallClient: CallClient {
   private var controls = Controls()
   private var observers: [UUID: AsyncStream<CallEvent>.Continuation] = [:]
   private var monitor: Task<Void, Never>?
+  private var session: MediaSession?
+  private var mediaCallID: CallID?
+  private var mediaTask: Task<Void, Never>?
+  private var mediaReconnecting = false
+  private var mediaRoster: [UserID]?
+  private var visibleVideo: [UserID] = []
 
   private struct Controls {
     var microphone = true
@@ -38,7 +69,7 @@ actor LiveCallClient: CallClient {
     makeKey: @escaping @Sendable () -> String = { "ios-call-\(UUID().uuidString.lowercased())" },
     sleep: @escaping @Sendable (Duration) async -> Void = { try? await Task.sleep(for: $0) },
     pollInterval: Duration = .seconds(1), heartbeatInterval: TimeInterval = 10,
-    onSessionEnded: @escaping @Sendable () async -> Void = {}
+    onSessionEnded: @escaping @Sendable () async -> Void = {}, media: MediaDependencies? = nil
   ) {
     self.api = api
     self.currentUser = currentUser
@@ -48,6 +79,7 @@ actor LiveCallClient: CallClient {
     self.pollInterval = pollInterval
     self.heartbeatInterval = heartbeatInterval
     self.onSessionEnded = onSessionEnded
+    self.media = media
   }
 
   // MARK: CallClient
@@ -89,7 +121,7 @@ actor LiveCallClient: CallClient {
       let wire = try await api.create(request)
       pendingCreate = nil
       handled.insert(CallID(wire.callID))
-      return try commit(wire, me: me.id)
+      return try await commit(wire, me: me.id)
     } catch {
       if !Self.isRetryable(error) { pendingCreate = nil }
       throw await translate(error, creating: true)
@@ -133,30 +165,44 @@ actor LiveCallClient: CallClient {
     do {
       let wire = try await api.perform(.join, id: callID.rawValue, peer: me.id)
       handled.insert(callID)
-      return try commit(wire, me: me.id)
+      return try await commit(wire, me: me.id)
     } catch {
       throw await translate(error, creating: false)
     }
   }
 
+  func setVisibleVideoPeers(_ users: [UserID], callID: CallID) async {
+    visibleVideo = users
+    guard mediaCallID == callID else { return }
+    await session?.setVisibleVideoPeers(users)
+  }
+
   func setMicrophoneEnabled(_ enabled: Bool, callID: CallID) async throws -> CallSnapshot {
     controls.microphone = enabled
-    return try updateControls(callID)
+    let updated = try updateControls(callID)
+    await session?.setMicrophone(enabled)
+    return updated
   }
 
   func setCameraEnabled(_ enabled: Bool, callID: CallID) async throws -> CallSnapshot {
     controls.camera = enabled
-    return try updateControls(callID)
+    let updated = try updateControls(callID)
+    await session?.setCamera(enabled)
+    return updated
   }
 
   func setSpeakerEnabled(_ enabled: Bool, callID: CallID) async throws -> CallSnapshot {
     controls.speaker = enabled
-    return try updateControls(callID)
+    let updated = try updateControls(callID)
+    await session?.setSpeaker(enabled)
+    return updated
   }
 
   func flipCamera(callID: CallID) async throws -> CallSnapshot {
     controls.position = controls.position == .front ? .back : .front
-    return try updateControls(callID)
+    let updated = try updateControls(callID)
+    await session?.flipCamera()
+    return updated
   }
 
   func demoIncomingCall(kind: CallKind) async throws -> CallSnapshot { throw CallError.unsupported }
@@ -175,7 +221,8 @@ actor LiveCallClient: CallClient {
   }
 
   /// Stops polling and heartbeats, e.g. on sign-out.
-  func stopMonitoring() {
+  func stopMonitoring() async {
+    await stopMedia()
     monitor?.cancel()
     monitor = nil
     for observer in observers.values { observer.finish() }
@@ -207,9 +254,16 @@ actor LiveCallClient: CallClient {
   }
 
   private func map(_ wire: WireCallInfo, me: UserID) -> CallSnapshot? {
-    CallMapper.snapshot(
-      wire, me: me, microphone: controls.microphone, camera: controls.camera,
-      speaker: controls.speaker, cameraPosition: controls.position)
+    guard
+      let snapshot = CallMapper.snapshot(
+        wire, me: me, microphone: controls.microphone, camera: controls.camera,
+        speaker: controls.speaker, cameraPosition: controls.position)
+    else { return nil }
+    guard mediaCallID == snapshot.id, !snapshot.state.isTerminal else { return snapshot }
+    // While media runs, the room roster is the truth for who is on screen and for recovery state.
+    let state: CallState = mediaReconnecting && snapshot.state == .active ? .reconnecting : snapshot.state
+    let people = mediaRoster.map { Self.people($0, existing: snapshot.participants, me: me) }
+    return Self.replacing(snapshot, state: state, participants: people ?? snapshot.participants)
   }
 
   private func startMonitoring() {
@@ -232,7 +286,8 @@ actor LiveCallClient: CallClient {
 
   private func refresh(_ call: CallSnapshot, me: UserID) async throws {
     let heartbeatDue =
-      (call.state == .active || (call.state == .ringing && call.kind == .group))
+      (call.state == .active || call.state == .reconnecting
+        || (call.state == .ringing && call.kind == .group))
       && now().timeIntervalSince(lastHeartbeat ?? .distantPast) >= heartbeatInterval
     let wire: WireCallInfo
     if heartbeatDue {
@@ -242,7 +297,7 @@ actor LiveCallClient: CallClient {
       wire = try await api.call(id: call.id.rawValue, peer: me)
     }
     guard current?.id == call.id, current?.state.isTerminal == false else { return }
-    try commit(wire, me: me)
+    try await commit(wire, me: me)
   }
 
   private func discover(me: UserID) async throws {
@@ -264,10 +319,10 @@ actor LiveCallClient: CallClient {
   private func handlePollFailure(_ error: Error, me: UserID) async {
     switch error as? VoIPError {
     case .notFound(let call), .conflict(let call, _):
-      if let call, (try? commit(call, me: me)) != nil { return }
-      if case .notFound = error as? VoIPError { endLocally() }
+      if let call, (try? await commit(call, me: me)) != nil { return }
+      if case .notFound = error as? VoIPError { await endLocally() }
     case .forbidden:
-      endLocally()
+      await endLocally()
     case .unauthorized, .revoked:
       await onSessionEnded()
     default:
@@ -275,15 +330,10 @@ actor LiveCallClient: CallClient {
     }
   }
 
-  private func endLocally() {
+  private func endLocally() async {
     guard let call = current, !call.state.isTerminal else { return }
-    let ended = CallSnapshot(
-      id: call.id, conversationID: call.conversationID, kind: call.kind, direction: call.direction,
-      state: .ended, participants: call.participants, startedAt: call.startedAt,
-      microphoneEnabled: call.microphoneEnabled, cameraEnabled: call.cameraEnabled,
-      speakerEnabled: call.speakerEnabled, cameraPosition: call.cameraPosition,
-      canJoin: false, localUserID: call.localUserID)
-    store(ended)
+    await stopMedia()
+    store(Self.replacing(call, state: .ended, canJoin: false))
   }
 
   // MARK: state
@@ -297,7 +347,7 @@ actor LiveCallClient: CallClient {
     do {
       let wire = try await api.perform(action, id: callID.rawValue, peer: me.id)
       handled.insert(callID)
-      return try commit(wire, me: me.id)
+      return try await commit(wire, me: me.id)
     } catch {
       throw await translate(error, creating: false)
     }
@@ -306,18 +356,15 @@ actor LiveCallClient: CallClient {
   private func updateControls(_ callID: CallID) throws -> CallSnapshot {
     guard let call = current, call.id == callID else { throw CallError.callNotFound }
     guard !call.state.isTerminal, call.state != .incoming else { throw CallError.invalidTransition }
-    let updated = CallSnapshot(
-      id: call.id, conversationID: call.conversationID, kind: call.kind, direction: call.direction,
-      state: call.state, participants: call.participants, startedAt: call.startedAt,
-      microphoneEnabled: controls.microphone, cameraEnabled: controls.camera,
-      speakerEnabled: controls.speaker, cameraPosition: controls.position,
-      canJoin: call.canJoin, localUserID: call.localUserID)
+    let updated = Self.replacing(
+      call, microphone: controls.microphone, camera: controls.camera, speaker: controls.speaker,
+      position: controls.position)
     store(updated)
     return updated
   }
 
   @discardableResult
-  private func commit(_ wire: WireCallInfo, me: UserID) throws -> CallSnapshot {
+  private func commit(_ wire: WireCallInfo, me: UserID) async throws -> CallSnapshot {
     guard let snapshot = map(wire, me: me) else {
       throw VoIPError.invalidResponse
     }
@@ -325,6 +372,7 @@ actor LiveCallClient: CallClient {
       lastHeartbeat = now()
     }
     store(snapshot)
+    await syncMedia(wire, me: me)
     return snapshot
   }
 
@@ -365,6 +413,109 @@ actor LiveCallClient: CallClient {
       return error
     default: return error
     }
+  }
+
+  // MARK: media
+
+  private func syncMedia(_ wire: WireCallInfo, me: UserID) async {
+    guard let media else { return }
+    let id = CallID(wire.callID)
+    // Media runs while the server has this device accepted in a call that is still running.
+    let inRoom = wire.status == "accepted" && wire.groupStatus != "ended"
+    if inRoom {
+      guard mediaCallID != id else { return }
+      await stopMedia()
+      await startMedia(id, roomID: wire.roomID, me: me, media: media)
+    } else if mediaCallID == id {
+      await stopMedia()
+    }
+  }
+
+  private func startMedia(_ id: CallID, roomID: String, me: UserID, media: MediaDependencies) async {
+    let api = api
+    let session = MediaSession(
+      api: api, makePeer: { media.makePeer(me) }, makeTransport: media.makeTransport,
+      sleep: media.sleep, stillAccepted: { [weak self] in await self?.serverKeepsMe(in: id) ?? false },
+      retryDelays: media.retryDelays)
+    self.session = session
+    mediaCallID = id
+    mediaReconnecting = false
+    mediaRoster = nil
+    let stream = await session.events()
+    mediaTask = Task { [weak self] in
+      for await event in stream { await self?.handleMedia(event, callID: id, me: me) }
+    }
+    await session.setVisibleVideoPeers(visibleVideo)
+    await session.start(
+      callID: id.rawValue, roomID: roomID, me: me, microphone: controls.microphone,
+      camera: controls.camera)
+  }
+
+  private func stopMedia() async {
+    mediaTask?.cancel()
+    mediaTask = nil
+    let old = session
+    session = nil
+    mediaCallID = nil
+    mediaReconnecting = false
+    mediaRoster = nil
+    await old?.stop()
+  }
+
+  private func handleMedia(_ event: MediaEvent, callID: CallID, me: UserID) async {
+    guard mediaCallID == callID, let call = current, call.id == callID, !call.state.isTerminal
+    else { return }
+    switch event {
+    case .roster(let users):
+      mediaRoster = users
+      store(Self.replacing(call, participants: Self.people(users, existing: call.participants, me: me)))
+    case .state(.reconnecting):
+      mediaReconnecting = true
+      if call.state == .active { store(Self.replacing(call, state: .reconnecting)) }
+    case .state(.connected):
+      mediaReconnecting = false
+      if call.state == .reconnecting { store(Self.replacing(call, state: .active)) }
+    case .state(.failed):
+      await endLocally()
+    case .state(.connecting):
+      break
+    }
+  }
+
+  /// Recovery applies only while the server still holds this device in the call; a definitive "no" ends it.
+  private func serverKeepsMe(in id: CallID) async -> Bool {
+    guard let me = await currentUser() else { return false }
+    do {
+      let wire = try await api.call(id: id.rawValue, peer: me.id)
+      return wire.status == "accepted" && wire.groupStatus != "ended"
+    } catch VoIPError.notFound, VoIPError.forbidden {
+      return false
+    } catch {
+      return true  // a transient failure must not abandon a call that may still be there
+    }
+  }
+
+  private static func people(_ roster: [UserID], existing: [User], me: UserID) -> [User] {
+    let known = Dictionary(existing.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+    let localUser = known[me] ?? User(id: me, displayName: me.rawValue, initials: String(me.rawValue.prefix(2)).uppercased())
+    return [localUser]
+      + roster.filter { $0 != me }.map {
+        known[$0] ?? User(id: $0, displayName: $0.rawValue, initials: String($0.rawValue.prefix(2)).uppercased())
+      }
+  }
+
+  private static func replacing(
+    _ call: CallSnapshot, state: CallState? = nil, participants: [User]? = nil,
+    microphone: Bool? = nil, camera: Bool? = nil, speaker: Bool? = nil,
+    position: CameraPosition? = nil, canJoin: Bool? = nil
+  ) -> CallSnapshot {
+    CallSnapshot(
+      id: call.id, conversationID: call.conversationID, kind: call.kind, direction: call.direction,
+      state: state ?? call.state, participants: participants ?? call.participants,
+      startedAt: call.startedAt, microphoneEnabled: microphone ?? call.microphoneEnabled,
+      cameraEnabled: camera ?? call.cameraEnabled, speakerEnabled: speaker ?? call.speakerEnabled,
+      cameraPosition: position ?? call.cameraPosition, canJoin: canJoin ?? call.canJoin,
+      localUserID: call.localUserID)
   }
 
   private static func samePayload(_ a: CreateCallRequest, _ b: CreateCallRequest) -> Bool {

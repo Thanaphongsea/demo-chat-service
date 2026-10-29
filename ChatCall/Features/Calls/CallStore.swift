@@ -90,6 +90,23 @@ final class CallStore {
     await perform { [client] in try await client.endForEveryone(callID: call.id) }
   }
 
+  func nextPage() {
+    page.next()
+    syncVisibleVideo()
+  }
+
+  func previousPage() {
+    page.previous()
+    syncVisibleVideo()
+  }
+
+  /// Tells the client which remote videos the screen needs; hiding a tile alone would not stop the traffic.
+  func syncVisibleVideo() {
+    guard let call, !call.state.isTerminal, call.state != .incoming else { return }
+    let users = page.tiles.dropFirst().map(\.user.id)
+    Task { [client] in await client.setVisibleVideoPeers(Array(users), callID: call.id) }
+  }
+
   func toggleMicrophone() async {
     guard let call, canControl else { return }
     await perform { [client] in
@@ -156,6 +173,7 @@ final class CallStore {
       if !history.contains(where: { $0.id == updated.id }) { history.insert(updated, at: 0) }
     } else {
       isPresented = true
+      syncVisibleVideo()
     }
   }
 
