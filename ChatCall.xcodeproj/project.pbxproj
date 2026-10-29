@@ -17,6 +17,7 @@
 		163F0A287F4FCA0C1EF050CE /* ChatMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0B7E707AF66449E13DC0BE8 /* ChatMapper.swift */; };
 		1A51CF31A9F72248EF0BB20D /* MessagingFlowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7C4A736AC9F94DF53DAD412 /* MessagingFlowTests.swift */; };
 		1D2D1EC7492FF03707D68D39 /* DemoScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC3C5209370B7E36628DD9E3 /* DemoScheduler.swift */; };
+		2492F821BEF331F92B624E96 /* CentrifugoRealtime.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A060C13B3BD013A10651432 /* CentrifugoRealtime.swift */; };
 		28B7C632D4F3DA9487296688 /* MockChatClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = F82BAF42E3AAC12B248ACCD1 /* MockChatClient.swift */; };
 		29A43BD72E635E70D9DAD471 /* RealtimeEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6307298AE5D0EF31B10D2BB2 /* RealtimeEvent.swift */; };
 		2BA11C776DB0B4EFB50635F0 /* ConversationListStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEA44074347F79A6A79D0AD9 /* ConversationListStore.swift */; };
@@ -72,6 +73,7 @@
 		B3D2AE517D8982AE87B8D115 /* ConversationListStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14406D254BC5C6FE18450FF4 /* ConversationListStoreTests.swift */; };
 		B4F085332F3022156E195442 /* GatewayClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F342DCFCE516C2FDC4B62482 /* GatewayClientTests.swift */; };
 		C1AED3F32E55F521EB8B06DD /* ChatRoomView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 225512E8E5C2DED5A33D4ED2 /* ChatRoomView.swift */; };
+		C56B1655B505C4638693ADE6 /* SwiftCentrifuge in Frameworks */ = {isa = PBXBuildFile; productRef = B82BA6CE6BE3117802DD95AE /* SwiftCentrifuge */; };
 		C82139C7D2A9D2191E44A66A /* AuthStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26343FCE1C253FBE88908A07 /* AuthStoreTests.swift */; };
 		CDC978A08B31EAB4C7665871 /* AuthStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D29F1CBD393CFAD41013BF79 /* AuthStore.swift */; };
 		D0457980650677626AACA167 /* VideoTileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B2AB0FA18C7909A976C25B2 /* VideoTileView.swift */; };
@@ -132,6 +134,7 @@
 		225512E8E5C2DED5A33D4ED2 /* ChatRoomView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatRoomView.swift; sourceTree = "<group>"; };
 		231C771ABCCF691F154099E5 /* CallControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallControlsView.swift; sourceTree = "<group>"; };
 		26343FCE1C253FBE88908A07 /* AuthStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthStoreTests.swift; sourceTree = "<group>"; };
+		2A060C13B3BD013A10651432 /* CentrifugoRealtime.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CentrifugoRealtime.swift; sourceTree = "<group>"; };
 		2A515220D15698E41ED04378 /* ChatRoomFixtures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatRoomFixtures.swift; sourceTree = "<group>"; };
 		2BB4DDC8CE659CD0D505F77D /* VideoCallFlowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoCallFlowTests.swift; sourceTree = "<group>"; };
 		2CCA04D0637952B19174E39C /* CallsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallsListView.swift; sourceTree = "<group>"; };
@@ -204,6 +207,17 @@
 		F9F95C68C6FA715825599B19 /* SessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionStore.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFrameworksBuildPhase section */
+		95CF8E56D979011FBC943B13 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C56B1655B505C4638693ADE6 /* SwiftCentrifuge in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
 /* Begin PBXGroup section */
 		0788AA7F6EB59AF280ED20A7 /* Resources */ = {
 			isa = PBXGroup;
@@ -253,6 +267,7 @@
 				A0B7E707AF66449E13DC0BE8 /* ChatMapper.swift */,
 				560A946B02BB2F719DE1BF18 /* LiveChatClient.swift */,
 				6307298AE5D0EF31B10D2BB2 /* RealtimeEvent.swift */,
+				2A060C13B3BD013A10651432 /* CentrifugoRealtime.swift */,
 			);
 			name = Live;
 			path = Live;
@@ -494,12 +509,16 @@
 			buildPhases = (
 				9AAE506D1183D930C776C9E1 /* Sources */,
 				FA520AA0C20140E24A65783B /* Resources */,
+				95CF8E56D979011FBC943B13 /* Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			name = ChatCall;
+			packageProductDependencies = (
+				B82BA6CE6BE3117802DD95AE /* SwiftCentrifuge */,
+			);
 			productName = ChatCall;
 			productReference = B7CDCD907BD3B2CF7310421D /* ChatCall.app */;
 			productType = "com.apple.product-type.application";
@@ -527,6 +546,9 @@
 			);
 			mainGroup = 22DB38B2C06B7AAB1B2108DF;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				925ADFDE1960A7DD9E0F93B5 /* XCRemoteSwiftPackageReference "centrifuge-swift" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 829D33ECC3AA7E60BB8BAB2E /* Products */;
 			projectDirPath = "";
@@ -654,6 +676,7 @@
 				163F0A287F4FCA0C1EF050CE /* ChatMapper.swift in Sources */,
 				3972420E026AC7B1C7270613 /* LiveChatClient.swift in Sources */,
 				29A43BD72E635E70D9DAD471 /* RealtimeEvent.swift in Sources */,
+				2492F821BEF331F92B624E96 /* CentrifugoRealtime.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -944,6 +967,25 @@
 			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		925ADFDE1960A7DD9E0F93B5 /* XCRemoteSwiftPackageReference "centrifuge-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/centrifugal/centrifuge-swift";
+			requirement = {
+				kind = exactVersion;
+				version = 0.10.4;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		B82BA6CE6BE3117802DD95AE /* SwiftCentrifuge */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 925ADFDE1960A7DD9E0F93B5 /* XCRemoteSwiftPackageReference "centrifuge-swift" */;
+			productName = SwiftCentrifuge;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 8531F114F432F0E2893969C7 /* Project object */;
 }

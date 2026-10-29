@@ -1,0 +1,24 @@
+{
+  "originHash" : "5409f250d072440e89830379e0237c82d6346c9a37da0e453218cf606c4cee24",
+  "pins" : [
+    {
+      "identity" : "centrifuge-swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/centrifugal/centrifuge-swift",
+      "state" : {
+        "revision" : "0eb4e95b374acd540c37bbd426826831ee99559a",
+        "version" : "0.10.4"
+      }
+    },
+    {
+      "identity" : "swift-protobuf",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-protobuf",
+      "state" : {
+        "revision" : "3d537cb81aef272a03cb3be815439e9bf0eb3bd3",
+        "version" : "1.39.0"
+      }
+    }
+  ],
+  "version" : 3
+}
