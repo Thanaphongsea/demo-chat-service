@@ -8,14 +8,18 @@ struct MockCallClientTests {
   func outgoingAndControls() async throws {
     let scheduler = ManualDemoScheduler()
     let client = MockCallClient(scheduler: scheduler)
-    var events = await client.events().makeAsyncIterator()
+    let probe = EventProbe<CallEvent>()
+    await probe.start(stream: client.events())
+    defer { Task { await probe.cancel() } }
     let call = try await client.startVideoCall(in: MockSeed.standard.conversations[0])
     #expect(call.state == .ringing)
     #expect(call.participants.map(\.id.rawValue) == ["user-me", "user-ava"])
-    #expect(await events.next() == .callUpdated(call))
+    try #require(await waitUntil { await probe.count >= 1 })
+    #expect(await probe.value(at: 0) == .callUpdated(call))
     #expect(await scheduler.waitForPendingSleep())
     await scheduler.advance()
-    guard case .callUpdated(let active) = await events.next() else {
+    try #require(await waitUntil { await probe.count >= 2 })
+    guard case .callUpdated(let active) = await probe.value(at: 1) else {
       Issue.record("A ringing call must publish its active transition")
       return
     }
