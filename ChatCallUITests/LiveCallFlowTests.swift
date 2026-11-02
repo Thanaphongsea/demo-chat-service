@@ -2,10 +2,11 @@ import XCTest
 
 /// Opt-in: drives the real app against the dev services. u_alice rings u_bob over REST; the app, signed in as
 /// u_bob, must show the incoming call, answer it, and stay in the call. Needs
-/// `TEST_RUNNER_CHATCALL_LIVE_PASSWORD`. It places a real call on the dev VoIP service.
+/// `TEST_RUNNER_CHATCALL_LIVE_PASSWORD`, `TEST_RUNNER_CHATCALL_AUTH_URL` and
+/// `TEST_RUNNER_CHATCALL_VOIP_URL`. It places a real call on the dev VoIP service.
 nonisolated final class LiveCallFlowTests: XCTestCase {
-  private static let auth = "https://unset.invalid"
-  private static let voip = "https://unset.invalid"
+  private static let auth = ProcessInfo.processInfo.environment["CHATCALL_AUTH_URL"] ?? ""
+  private static let voip = ProcessInfo.processInfo.environment["CHATCALL_VOIP_URL"] ?? ""
 
   @MainActor
   func testBobAnswersAnIncomingCall() throws {
