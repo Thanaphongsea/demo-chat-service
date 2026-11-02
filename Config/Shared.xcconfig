@@ -1,0 +1,7 @@
+// Tunnel hosts for the dev services. Override in Config/Local.xcconfig (git-ignored).
+// Hosts only: `//` starts a comment in an xcconfig, so a full URL cannot be written here.
+CHATCALL_AUTH_HOST = unset.invalid
+CHATCALL_VOIP_HOST = unset.invalid
+
+
+#include? "Local.xcconfig"

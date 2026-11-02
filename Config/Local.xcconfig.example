@@ -1,0 +1,3 @@
+// Copy to Config/Local.xcconfig (git-ignored), set the current tunnel hosts, then rebuild.
+CHATCALL_AUTH_HOST = unset.invalid
+CHATCALL_VOIP_HOST = unset.invalid

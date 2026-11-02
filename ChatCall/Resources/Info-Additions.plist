@@ -7,5 +7,9 @@
 		<string>audio</string>
 		<string>voip</string>
 	</array>
+	<key>ChatCallAuthBaseURL</key>
+	<string>https://$(CHATCALL_AUTH_HOST)</string>
+	<key>ChatCallVoIPBaseURL</key>
+	<string>https://$(CHATCALL_VOIP_HOST)</string>
 </dict>
 </plist>

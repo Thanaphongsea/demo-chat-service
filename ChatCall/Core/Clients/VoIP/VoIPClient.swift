@@ -11,9 +11,9 @@ nonisolated struct VoIPConfiguration: Equatable, Sendable {
 
   init(baseURL: URL) { self.baseURL = baseURL }
 
-  /// Dev service. The quick tunnel URL changes when it is restarted; update it here or override at launch.
+  /// From `Config/Local.xcconfig` via Info.plist (`unset.invalid` if unset); `-voipURL` overrides it at launch.
   static let dev = VoIPConfiguration(
-    baseURL: URL(string: "https://unset.invalid")!)
+    baseURL: BuildConfiguration.url(forInfoKey: "ChatCallVoIPBaseURL"))
 
   /// Launch-argument override on top of `dev`; an invalid override is ignored.
   init(defaults: UserDefaults = .standard) {

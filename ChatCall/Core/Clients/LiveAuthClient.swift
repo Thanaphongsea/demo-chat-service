@@ -11,9 +11,9 @@ nonisolated struct AuthConfiguration: Equatable, Sendable {
     self.appID = appID
   }
 
-  /// Dev service. The quick tunnel URL changes when it is restarted; update it here or override at launch.
+  /// From `Config/Local.xcconfig` via Info.plist (`unset.invalid` if unset); `-authBaseURL` overrides it at launch.
   static let dev = AuthConfiguration(
-    baseURL: URL(string: "https://unset.invalid")!,
+    baseURL: BuildConfiguration.url(forInfoKey: "ChatCallAuthBaseURL"),
     appID: "1400000000")
 
   /// Launch-argument overrides on top of `dev`; an invalid override is ignored.

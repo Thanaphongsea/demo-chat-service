@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A1B2C3D4E5F60718293A4B02 /* BuildConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B01 /* BuildConfiguration.swift */; };
 		0073CA33429060F054698C40 /* AuthenticatedShellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 769AA539D43E42EA80B3BC5A /* AuthenticatedShellView.swift */; };
 		0A11AA7B18A0504BEFCBF961 /* DateSeparator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60CA0C4A65975950FFCA4273 /* DateSeparator.swift */; };
 		0A58796E52208CE1BAB18928 /* SignalMessageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1059186393E5F5C6117C777 /* SignalMessageTests.swift */; };
@@ -148,6 +149,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		A1B2C3D4E5F60718293A4B01 /* BuildConfiguration.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BuildConfiguration.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F60718293A4B03 /* Shared.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Shared.xcconfig; sourceTree = "<group>"; };
 		04BBDBE4E8B220CC2AA55EE9 /* HTTPTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTTPTransport.swift; sourceTree = "<group>"; };
 		0596FAD598EAC043BDA7DE1A /* AppDependencies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDependencies.swift; sourceTree = "<group>"; };
 		0732DBE339E1775D1C64A839 /* IntegrationQATests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntegrationQATests.swift; sourceTree = "<group>"; };
@@ -286,6 +289,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		A1B2C3D4E5F60718293A4B04 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				A1B2C3D4E5F60718293A4B03 /* Shared.xcconfig */,
+			);
+			path = Config;
+			sourceTree = "<group>";
+		};
 		0788AA7F6EB59AF280ED20A7 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
@@ -325,6 +336,7 @@
 		22DB38B2C06B7AAB1B2108DF = {
 			isa = PBXGroup;
 			children = (
+				A1B2C3D4E5F60718293A4B04 /* Config */,
 				77716F4AFD22F7C6FBA1BB07 /* ChatCall */,
 				7B35255815EEE4D244BE69C2 /* ChatCallTests */,
 				E1F06A66050F402C528F0555 /* ChatCallUITests */,
@@ -516,6 +528,7 @@
 			isa = PBXGroup;
 			children = (
 				97B9704568A4FD06C6B00B04 /* AuthClient.swift */,
+				A1B2C3D4E5F60718293A4B01 /* BuildConfiguration.swift */,
 				D71E3DC1B7C005595059D80E /* CallClient.swift */,
 				CD785C48F9062BD80D95C4A3 /* ChatClient.swift */,
 				04BBDBE4E8B220CC2AA55EE9 /* HTTPTransport.swift */,
@@ -824,6 +837,7 @@
 				2492F821BEF331F92B624E96 /* CentrifugoRealtime.swift in Sources */,
 				FA6268359A8249C98A562C4F /* CallWire.swift in Sources */,
 				E726518FDDD4CA2B3EC8C5DA /* VoIPClient.swift in Sources */,
+				A1B2C3D4E5F60718293A4B02 /* BuildConfiguration.swift in Sources */,
 				E9E1185238A4F78B732ADB6E /* CallMapper.swift in Sources */,
 				BC917D4F47985F114DBAFE1F /* LiveCallClient.swift in Sources */,
 				DB75D112B41B71D5405ED6C8 /* SignalMessage.swift in Sources */,
@@ -874,6 +888,7 @@
 		};
 		5F9A21EC349D6EE3447D0636 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = A1B2C3D4E5F60718293A4B03 /* Shared.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -1006,6 +1021,7 @@
 		};
 		E450E1B31AF44457FA43CFC6 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = A1B2C3D4E5F60718293A4B03 /* Shared.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
